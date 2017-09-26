@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <AssemblyName>Voidwell.VoidwellAuth.IdentityServer</AssemblyName>
+    <RootNamespace>Voidwell.VoidwellAuth.IdentityServer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4" Version="1.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VoidwellAuth.Data\Voidwell.Auth.Data.csproj" />
+  </ItemGroup>
+
+</Project>

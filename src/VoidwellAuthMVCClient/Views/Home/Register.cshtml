@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+<h2>@ViewData["Title"].</h2>
+
+<div>
+    <form action="http://localhost:5000/account/register" method="post">
+        <div>
+            <span>Username</span>
+            <input type="text" name="username" />
+        </div>
+        <div>
+            <span>Email</span>
+            <input type="email" name="email" />
+        </div>
+        <div>
+            <span>Password</span>
+            <input type="password" name="password" />
+        </div>
+        <div>
+            <span>Confirm Password</span>
+            <input type="password" name="confirmPassword" />
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+</div>
