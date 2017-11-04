@@ -2,7 +2,7 @@
 using IdentityServer4;
 using IdentityServer4.Models;
 
-namespace Voidwell.VoidwellAuth.Data
+namespace Voidwell.Auth.Data
 {
     public class SeedConfig
     {

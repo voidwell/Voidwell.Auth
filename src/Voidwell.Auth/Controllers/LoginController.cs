@@ -1,13 +1,12 @@
 ﻿using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using IdentityServer4.Events;
-using Voidwell.VoidwellAuth.IdentityServer.Services;
-using Voidwell.VoidwellAuth.Client.Models;
+using Voidwell.Auth.Models;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Voidwell.VoidwellAuth.Client.Controllers
 {
@@ -18,14 +17,14 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
         private readonly AccountService _account;
-        private readonly IAuthenticationService _authService;
+        private readonly Auth.Services.IAuthenticationService _authService;
 
         public LoginController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IHttpContextAccessor httpContextAccessor,
             IEventService events,
-            IAuthenticationService authService)
+            Auth.Services.IAuthenticationService authService)
         {
             _authService = authService;
 
@@ -55,7 +54,7 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
             if (ModelState.IsValid)
             {
                 // validate username/password against in-memory store
-                var authResult = _authService.Authenticate(authRequest.Username, authRequest.Password);
+                var authResult = await _authService.Authenticate(authRequest.Username, authRequest.Password);
                 if (authResult != null)
                 {
                     AuthenticationProperties props = null;
@@ -72,7 +71,7 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
 
                     // issue authentication cookie with subject ID and username
                     await _events.RaiseAsync(new UserLoginSuccessEvent(authResult.Profile.Email, authResult.UserId.ToString(), authResult.Profile.DisplayName));
-                    await HttpContext.Authentication.SignInAsync(authResult.UserId.ToString(), authResult.Profile.Email, props, authResult.Claims.ToArray());
+                    await HttpContext.SignInAsync(authResult.UserId.ToString(), authResult.Profile.Email, props, authResult.Claims.ToArray());
 
                     // make sure the returnUrl is still valid, and if yes - redirect back to authorize endpoint or a local page
                     if (_interaction.IsValidReturnUrl(authRequest.ReturnUrl) || Url.IsLocalUrl(authRequest.ReturnUrl))

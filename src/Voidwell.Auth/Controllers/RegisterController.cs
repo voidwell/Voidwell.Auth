@@ -1,29 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Voidwell.VoidwellAuth.Client.Models;
-using Voidwell.VoidwellAuth.IdentityServer.Services;
+using Voidwell.Auth.Services;
+using Voidwell.Auth.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Voidwell.VoidwellAuth.Client.Controllers
 {
     [Route("account/register")]
     public class RegisterController : Controller
     {
-        private readonly IUserService _userService;
+        private readonly IRegistrationService _registrationService;
 
-        public RegisterController(IUserService userService)
+        public RegisterController(IRegistrationService registrationService)
         {
-            _userService = userService;
+            _registrationService = registrationService;
         }
 
         [HttpPost]
-        public async Task<ActionResult> Register(RegistrationForm registration)
+        public async Task<ActionResult> Register([FromBody]RegistrationForm registration)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = await _userService.CreateUser(registration.Username, registration.Email, registration.Password);
+            var user = await _registrationService.RegisterNewUserAsync(registration);
 
             return Created("/register", user);
         }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.VoidwellAuth.Client.Models
+namespace Voidwell.Auth.Models
 {
     public class AuthenticationRequest
     {
