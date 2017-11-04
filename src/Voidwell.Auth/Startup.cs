@@ -2,49 +2,66 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Voidwell.VoidwellAuth.Data;
-using Voidwell.VoidwellAuth.IdentityServer;
+using Voidwell.Auth;
+using Voidwell.Auth.Filters;
+using Voidwell.Auth.Services;
+using Voidwell.Auth.Data;
+using IdentityServer4.Services;
+using Newtonsoft.Json;
 
 namespace Voidwell.VoidwellAuth.Client
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvcCore()
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                })
+                .AddDataAnnotations()
+                .AddMvcOptions(options =>
+                {
+                    options.Filters.AddService(typeof(InvalidSecurityQuestionFilter));
+                });
 
-            services.AddVoidwellIdentityServer();
+            services.AddTransient<ICorsPolicyService, CorsPolicyService>();
+            services.AddTransient<IRegistrationService, RegistrationService>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IAuthenticationService, AuthenticationService>();
+            services.AddTransient<ISecurityQuestionService, SecurityQuestionService>();
+            services.AddSingleton<IUserCryptography, UserCryptography>();
+
+            services.AddTransient<InvalidSecurityQuestionFilter>();
+
+            services.AddVoidwellIdentityServer(Configuration);
+
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            loggerFactory.AddConsole(LogLevel.Information);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UserVoidwellIdentityServer();
+            app.UseVoidwellIdentityServer();
 
             app.SeedData();
 
             app.UseStaticFiles();
-            app.UseMvcWithDefaultRoute();
+            app.UseMvc();
         }
     }
 }

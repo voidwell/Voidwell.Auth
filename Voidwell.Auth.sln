@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoidwellAuthMVCClient", "src\VoidwellAuthMVCClient\VoidwellAuthMVCClient.csproj", "{A1E308C2-645E-47BF-8FFD-042C97352793}"
 EndProject
@@ -9,13 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Auth.Data", "src\V
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Auth", "src\Voidwell.Auth\Voidwell.Auth.csproj", "{3CB8DA74-429F-4896-958E-B45B3F7FDB37}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Auth.IdentityServer", "src\Voidwell.Auth.IdentityServer\Voidwell.Auth.IdentityServer.csproj", "{46882B80-696B-42A0-A0D7-E5EB5CB944DB}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BAF62441-142F-4DCF-9047-17E25F4F302E}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		Directory.Build.Props = Directory.Build.Props
 		Dockerfile = Dockerfile
 		Dockerfile.debug = Dockerfile.debug
 	EndProjectSection
@@ -38,10 +37,6 @@ Global
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Release|Any CPU.Build.0 = Release|Any CPU
-		{46882B80-696B-42A0-A0D7-E5EB5CB944DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{46882B80-696B-42A0-A0D7-E5EB5CB944DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46882B80-696B-42A0-A0D7-E5EB5CB944DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{46882B80-696B-42A0-A0D7-E5EB5CB944DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,7 +45,6 @@ Global
 		{A1E308C2-645E-47BF-8FFD-042C97352793} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{8F838585-4F59-424F-800A-199D93AE043C} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
-		{46882B80-696B-42A0-A0D7-E5EB5CB944DB} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8356B9-449C-421F-8C67-CAE7445379AC}
