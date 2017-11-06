@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Voidwell.Auth;
 using Voidwell.Auth.Filters;
 using Voidwell.Auth.Services;
 using Voidwell.Auth.Data;
 using IdentityServer4.Services;
 using Newtonsoft.Json;
+using Voidwell.Auth.Models;
+using Microsoft.AspNetCore.Identity;
+using System;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -34,6 +36,20 @@ namespace Voidwell.VoidwellAuth.Client
                     options.Filters.AddService(typeof(InvalidSecurityQuestionFilter));
                 });
 
+            services.AddEntityFrameworkContext(Configuration);
+
+            services.AddIdentity<ApplicationUser, ApplicationRole>(identity =>
+                {
+                    identity.User.RequireUniqueEmail = true;
+                    identity.Password.RequireDigit = false;
+                    identity.Password.RequireNonAlphanumeric = false;
+                    identity.Password.RequireLowercase = false;
+                    identity.Password.RequireUppercase = false;
+                    identity.Password.RequiredLength = 6;
+                })
+                .AddEntityFrameworkStores<UserDbContext>()
+                .AddDefaultTokenProviders();
+
             services.AddTransient<ICorsPolicyService, CorsPolicyService>();
             services.AddTransient<IRegistrationService, RegistrationService>();
             services.AddTransient<IUserService, UserService>();
@@ -43,9 +59,13 @@ namespace Voidwell.VoidwellAuth.Client
 
             services.AddTransient<InvalidSecurityQuestionFilter>();
 
-            services.AddVoidwellIdentityServer(Configuration);
-
             services.AddMvc();
+
+            services.AddIdentityServer()
+                .AddDeveloperSigningCredential()
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddIdentityServerStores(Configuration);
+                //.AddResourceOwnerValidator<ResourceOwnerPasswordValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,7 +76,7 @@ namespace Voidwell.VoidwellAuth.Client
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseVoidwellIdentityServer();
+            app.UseIdentityServer();
 
             app.SeedData();
 

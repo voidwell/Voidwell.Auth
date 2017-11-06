@@ -3,21 +3,26 @@ using System.Threading.Tasks;
 using Voidwell.Auth.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Voidwell.Auth.Data;
+using Microsoft.AspNetCore.Identity;
+using Voidwell.Auth.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Voidwell.Auth.Services
 {
     public class UserService : IUserService
     {
-        private readonly Func<AuthDbContext> _dbContextFactory;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserCryptography _crypt;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(Func<AuthDbContext> dbContextFactory, IUserCryptography crypt)
+        public UserService(UserManager<ApplicationUser> userManager, IUserCryptography crypt, ILogger<UserService> logger)
         {
-            _dbContextFactory = dbContextFactory;
+            _userManager = userManager;
             _crypt = crypt;
+            _logger = logger;
         }
 
-        public async Task<User> CreateUser(string displayName, string email, string password)
+        public async Task<ApplicationUser> CreateUser(string displayName, string email, string password)
         {
             var salt = _crypt.GenerateSalt();
             var hash = _crypt.GenerateHash(password, salt);
@@ -39,46 +44,36 @@ namespace Voidwell.Auth.Services
                 Created = DateTimeOffset.Now
             };
 
-            var dbContext = _dbContextFactory();
+            var newUser = new ApplicationUser
+            {
+                UserName = displayName,
+                Email = email,
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                LastLoginDate = DateTimeOffset.Now,
+                PasswordSetDate = DateTimeOffset.Now,
+                CreatedDate = DateTimeOffset.Now
+            };
 
-            await dbContext.Users.AddAsync(user);
-            await dbContext.SaveChangesAsync();
+            var result = await _userManager.CreateAsync(newUser);
 
+            return newUser;
+        }
+
+        public Task<ApplicationUser> GetUser(Guid userId)
+        {
+            return _userManager.Users.SingleOrDefaultAsync(a => a.Id == userId);
+        }
+
+        public Task<ApplicationUser> GetUserByEmail(string email)
+        {
+            return _userManager.Users.SingleOrDefaultAsync(a => a.Email == email);
+        }
+
+        public async Task<ApplicationUser> UpdateUser(ApplicationUser user)
+        {
+            await _userManager.UpdateAsync(user);
             return user;
-        }
-
-        public Task<User> GetUser(Guid userId)
-        {
-            var dbContext = _dbContextFactory();
-
-            return dbContext.Users
-                .Include(user => user.Authentication)
-                .Include(user => user.Profile)
-                .SingleOrDefaultAsync(a => a.Id == userId);
-        }
-
-        public Task<User> GetUserByEmail(string email)
-        {
-            var dbContext = _dbContextFactory();
-
-            return dbContext.Users
-                .Include(user => user.Authentication)
-                .Include(user => user.Profile)
-                .SingleOrDefaultAsync(a => a.Profile.Email == email);
-        }
-
-        public async Task<User> UpdateUser(User user)
-        {
-            var dbContext = _dbContextFactory();
-
-            var storageUser = await dbContext.Users.SingleOrDefaultAsync(a => a.Id == user.Id);
-
-            storageUser.Profile = user.Profile;
-
-            dbContext.Update(user);
-            await dbContext.SaveChangesAsync();
-
-            return storageUser;
         }
     }
 }

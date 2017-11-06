@@ -6,6 +6,6 @@ namespace Voidwell.Auth.Services
 {
     public interface IRegistrationService
     {
-        Task<User> RegisterNewUserAsync(RegistrationForm registrationForm);
+        Task<ApplicationUser> RegisterNewUserAsync(RegistrationForm registrationForm);
     }
 }

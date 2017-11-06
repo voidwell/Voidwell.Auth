@@ -1,6 +1,7 @@
 ﻿using IdentityModel;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -12,12 +13,14 @@ namespace Voidwell.Auth
 {
     public class ResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
     {
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IAuthenticationService _authService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<ResourceOwnerPasswordValidator> _logger;
 
-        public ResourceOwnerPasswordValidator(IAuthenticationService authService, IHttpContextAccessor httpContextAccessor, ILogger<ResourceOwnerPasswordValidator> logger)
+        public ResourceOwnerPasswordValidator(SignInManager<ApplicationUser> signInManager, IAuthenticationService authService, IHttpContextAccessor httpContextAccessor, ILogger<ResourceOwnerPasswordValidator> logger)
         {
+            _signInManager = signInManager;
             _authService = authService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
@@ -47,9 +50,12 @@ namespace Voidwell.Auth
                 IpAddress = httpContext.Connection.RemoteIpAddress?.ToString()
             };
 
-            var result = await _authService.Authenticate(context.UserName, context.Password);
+            await _authService.Authenticate(context.UserName, context.Password);
 
-            context.Result = new GrantValidationResult(result.UserId.ToString(), "password", result.Claims);
+            var claims = httpContext.User.Claims;
+            var userId = claims.SingleOrDefault(c => c.Type == JwtClaimTypes.Subject)?.Value;
+
+            context.Result = new GrantValidationResult(userId, "password", claims);
         }
     }
 }

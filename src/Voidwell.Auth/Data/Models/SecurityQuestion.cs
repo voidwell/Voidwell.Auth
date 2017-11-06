@@ -12,5 +12,8 @@ namespace Voidwell.Auth.Data.Models
         public string Question { get; set; }
         [Required]
         public string Answer { get; set; }
+
+        [ForeignKey("UserId")]
+        public User User { get; set; }
     }
 }
