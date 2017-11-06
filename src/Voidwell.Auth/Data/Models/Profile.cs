@@ -4,13 +4,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Voidwell.Auth.Data.Models
 {
-    public class SecurityQuestion
+    public class Profile
     {
+        [Key]
         [Required]
         public Guid UserId { get; set; }
         [Required]
-        public string Question { get; set; }
+        public string DisplayName { get; set; }
         [Required]
-        public string Answer { get; set; }
+        public string Email { get; set; }
+        public string TimeZone { get; set; }
+
+        [ForeignKey("UserId")]
+        public User User { get; set; }
     }
 }

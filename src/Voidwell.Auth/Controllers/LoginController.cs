@@ -53,38 +53,14 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
         {
             if (ModelState.IsValid)
             {
-                // validate username/password against in-memory store
-                var authResult = await _authService.Authenticate(authRequest.Username, authRequest.Password);
-                if (authResult != null)
+                await _authService.Authenticate(authRequest.Username, authRequest.Password);
+
+                if (_interaction.IsValidReturnUrl(authRequest.ReturnUrl) || Url.IsLocalUrl(authRequest.ReturnUrl))
                 {
-                    AuthenticationProperties props = null;
-                    // only set explicit expiration here if persistent. 
-                    // otherwise we reply upon expiration configured in cookie middleware.
-                    if (AccountOptions.AllowRememberLogin && authRequest.RememberLogin)
-                    {
-                        props = new AuthenticationProperties
-                        {
-                            IsPersistent = true,
-                            ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
-                        };
-                    };
-
-                    // issue authentication cookie with subject ID and username
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(authResult.Profile.Email, authResult.UserId.ToString(), authResult.Profile.DisplayName));
-                    await HttpContext.SignInAsync(authResult.UserId.ToString(), authResult.Profile.Email, props, authResult.Claims.ToArray());
-
-                    // make sure the returnUrl is still valid, and if yes - redirect back to authorize endpoint or a local page
-                    if (_interaction.IsValidReturnUrl(authRequest.ReturnUrl) || Url.IsLocalUrl(authRequest.ReturnUrl))
-                    {
-                        return Redirect(authRequest.ReturnUrl);
-                    }
-
-                    return Redirect("~/");
+                    return Redirect(authRequest.ReturnUrl);
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(authRequest.Username, "invalid credentials"));
-
-                ModelState.AddModelError("", AccountOptions.InvalidCredentialsErrorMessage);
+                return Redirect("~/");
             }
 
             // something went wrong, show form with error
