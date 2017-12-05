@@ -22,11 +22,12 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IHttpContextAccessor httpContextAccessor,
-            IEventService events)
+            IEventService events,
+            IAuthenticationSchemeProvider authenticationSchemeProvider)
         {
             _interaction = interaction;
             _events = events;
-            _account = new AccountService(interaction, httpContextAccessor, clientStore);
+            _account = new AccountService(interaction, httpContextAccessor, clientStore, authenticationSchemeProvider);
         }
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
             var user = HttpContext.User;
             if (user != null)
             {
-                await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetName()));
+                await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetDisplayName()));
             }
 
             return View("LoggedOut", vm);

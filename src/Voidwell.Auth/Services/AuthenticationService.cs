@@ -1,52 +1,62 @@
 ﻿using IdentityModel;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+using IdentityServer4;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Voidwell.Auth.Exceptions;
+using Voidwell.Auth.Clients;
 using Voidwell.Auth.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
 
 namespace Voidwell.Auth.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly SignInManager<ApplicationUser> _signinManager;
-        private readonly IUserService _userService;
-        private readonly IUserCryptography _crypt;
+        private readonly IUserManagementClient _userManagementClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
 
-        public AuthenticationService(SignInManager<ApplicationUser> signinManager, IUserService userService, IUserCryptography crypt, ILogger<AuthenticationService> logger)
+        public AuthenticationService(IUserManagementClient userManagementClient, IHttpContextAccessor httpContextAccessor, ILogger<AuthenticationService> logger)
         {
-            _signinManager = signinManager;
-            _userService = userService;
-            _crypt = crypt;
+            _userManagementClient = userManagementClient;
+            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
-        public async Task Authenticate(string username, string password)
+        public async Task Authenticate(AuthenticationRequest authRequest)
         {
-            var user = await _userService.GetUserByEmail(username);
+            var authResult = await _userManagementClient.Authenticate(authRequest);
 
-            _logger.LogDebug($"Attempting to login user: {username}");
-
-            if (user == null)
-            {
-                _logger.LogWarning($"Failed to find user: {username}");
+            if (authResult == null)
                 return;
-            }
 
-            var inputHash = _crypt.GenerateHash(password, user.PasswordSalt);
+            _logger.LogDebug($"Got authentication result for user {authResult?.UserId.ToString()}");
 
-            if (inputHash != user.PasswordHash)
+            var name = authResult.Claims.FirstOrDefault(a => a.Type == JwtClaimTypes.Name)?.Value;
+
+            var user = new IdentityServerUser(authResult.UserId.ToString())
             {
-                _logger.LogWarning($"Failed to authenticate for user: {username}");
-                throw new InvalidPasswordException();
-            }
+                DisplayName = name,
+                AuthenticationTime = DateTime.UtcNow,
+                AdditionalClaims = authResult.Claims.Where(AdditionalClaimFilter).ToArray(),
+                IdentityProvider = "auth.localdev.com"
+            };
+            var principal = user.CreatePrincipal();
 
-            _logger.LogDebug($"Successfully authenticated user: {username}");
+            var authProps = new AuthenticationProperties
+            {
+                IsPersistent = true
+            };
 
-            await _signinManager.SignInAsync(user, true);
+            await _httpContextAccessor.HttpContext.SignInAsync("voidwell", principal, authProps);
+        }
+
+        private static bool AdditionalClaimFilter(Claim claim)
+        {
+            return claim.Type != JwtClaimTypes.Name
+                && claim.Type != JwtClaimTypes.Subject;
         }
     }
 }

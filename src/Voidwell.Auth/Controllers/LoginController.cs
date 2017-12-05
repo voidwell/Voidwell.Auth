@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using IdentityServer4.Events;
 using Voidwell.Auth.Models;
 using Microsoft.AspNetCore.Authentication;
 
@@ -17,20 +16,21 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
         private readonly AccountService _account;
-        private readonly Auth.Services.IAuthenticationService _authService;
+        private readonly Auth.Services.IAuthenticationService _authenticationService;
 
         public LoginController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IHttpContextAccessor httpContextAccessor,
             IEventService events,
-            Auth.Services.IAuthenticationService authService)
+            Auth.Services.IAuthenticationService authenticationService,
+            IAuthenticationSchemeProvider authenticationSchemeProvider)
         {
-            _authService = authService;
+            _authenticationService = authenticationService;
 
             _interaction = interaction;
             _events = events;
-            _account = new AccountService(interaction, httpContextAccessor, clientStore);
+            _account = new AccountService(interaction, httpContextAccessor, clientStore, authenticationSchemeProvider);
         }
 
         /// <summary>
@@ -53,7 +53,15 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _authService.Authenticate(authRequest.Username, authRequest.Password);
+                try
+                {
+                    await _authenticationService.Authenticate(authRequest);
+                }
+                catch(Exception)
+                {
+                    var tryAgainView = await _account.BuildLoginViewModelAsync(authRequest);
+                    return View(tryAgainView);
+                }
 
                 if (_interaction.IsValidReturnUrl(authRequest.ReturnUrl) || Url.IsLocalUrl(authRequest.ReturnUrl))
                 {
