@@ -8,6 +8,8 @@ using System.Reflection;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using System.Linq;
+using IdentityServer4.Models;
+using System.Collections.Generic;
 
 namespace Voidwell.Auth.Data
 {
@@ -24,12 +26,6 @@ namespace Voidwell.Auth.Data
             var options = configuration.Get<DatabaseOptions>();
 
             services.AddEntityFrameworkNpgsql();
-            services.AddDbContext<AuthDbContext>(builder =>
-                builder.UseNpgsql(options.DBConnectionString, b => b.MigrationsAssembly(_migrationAssembly)));
-            services.AddTransient(sp => new Func<AuthDbContext>(() => sp.GetRequiredService<AuthDbContext>()));
-
-            services.AddDbContext<UserDbContext>(builder =>
-                builder.UseNpgsql(options.DBConnectionString, b => b.MigrationsAssembly(_migrationAssembly)));
 
             return services;
         }
@@ -50,50 +46,54 @@ namespace Voidwell.Auth.Data
                     builder.UseNpgsql(dbOptions.DBConnectionString, b => b.MigrationsAssembly(_migrationAssembly));
 
                 options.EnableTokenCleanup = true;
-                options.TokenCleanupInterval = 30;
+                options.TokenCleanupInterval = 3600;
             });
 
             return idsvBuilder;
+        }
+
+        public static IApplicationBuilder InitializeDatabases(this IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                List<DbContext> dbContextList = new List<DbContext>();
+                var sp = serviceScope.ServiceProvider;
+
+                dbContextList.Add(sp.GetRequiredService<PersistedGrantDbContext>());
+                dbContextList.Add(sp.GetRequiredService<ConfigurationDbContext>());
+
+                dbContextList.ForEach(a => a.Database.Migrate());
+            }
+
+            return app;
         }
 
         public static IApplicationBuilder SeedData(this IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
-                serviceScope.ServiceProvider.GetRequiredService<UserDbContext>().Database.Migrate();
-                serviceScope.ServiceProvider.GetRequiredService<AuthDbContext>().Database.Migrate();
-
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                context.Database.Migrate();
-                /*
+
                 if (!context.Clients.Any())
                 {
-                    foreach (var client in SeedConfig.GetClients())
-                    {
-                        context.Clients.Add(client.ToEntity());
-                    }
-                    context.SaveChanges();
-                }
-
-                if (!context.IdentityResources.Any())
-                {
-                    foreach (var resource in SeedConfig.GetIdentityResources())
-                    {
-                        context.IdentityResources.Add(resource.ToEntity());
-                    }
-                    context.SaveChanges();
+                    var clients = Seeding.Clients.GetClients().Select(a => a.ToEntity());
+                    context.Clients.AddRange(clients);
                 }
 
                 if (!context.ApiResources.Any())
                 {
-                    foreach (var resource in SeedConfig.GetApiResources())
-                    {
-                        context.ApiResources.Add(resource.ToEntity());
-                    }
-                    context.SaveChanges();
+                    var apiResources = Seeding.ApiResources.GetApiResources().Select(a => a.ToEntity());
+                    context.ApiResources.AddRange(apiResources);
                 }
-                */
+
+                if (!context.IdentityResources.Any())
+                {
+                    context.IdentityResources.Add(new IdentityResources.OpenId().ToEntity());
+                    context.IdentityResources.Add(new IdentityResources.Profile().ToEntity());
+                    context.IdentityResources.Add(new IdentityResources.Email().ToEntity());
+                }
+
+                context.SaveChanges();
             }
 
             return app;

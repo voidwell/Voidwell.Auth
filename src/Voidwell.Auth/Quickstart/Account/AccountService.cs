@@ -1,9 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using IdentityModel;
-using IdentityServer4.Extensions;
+﻿using IdentityModel;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
@@ -11,23 +6,27 @@ using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
+using System;
 
 namespace Voidwell.VoidwellAuth.Client
 {
     public class AccountService
     {
         private readonly IClientStore _clientStore;
+        private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountService(
             IIdentityServerInteractionService interaction,
             IHttpContextAccessor httpContextAccessor,
-            IClientStore clientStore)
+            IClientStore clientStore,
+            IAuthenticationSchemeProvider authenticationSchemeProvider)
         {
             _interaction = interaction;
             _httpContextAccessor = httpContextAccessor;
             _clientStore = clientStore;
+            _authenticationSchemeProvider = authenticationSchemeProvider;
         }
 
         public async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
@@ -45,29 +44,15 @@ namespace Voidwell.VoidwellAuth.Client
                 };
             }
 
-            var schemes = _httpContextAccessor.HttpContext.Authentication.GetAuthenticationSchemes();
+            var schemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
 
             var providers = schemes
-                .Where(x => x.DisplayName != null && !AccountOptions.WindowsAuthenticationSchemes.Contains(x.AuthenticationScheme))
+                .Where(x => x.DisplayName != null && !AccountOptions.WindowsAuthenticationSchemes.Contains(x.Name))
                 .Select(x => new ExternalProvider
                 {
                     DisplayName = x.DisplayName,
-                    AuthenticationScheme = x.AuthenticationScheme
+                    AuthenticationScheme = x.Name
                 }).ToList();
-
-            if (AccountOptions.WindowsAuthenticationEnabled)
-            {
-                // this is needed to handle windows auth schemes
-                var windowsSchemes = schemes.Where(s => AccountOptions.WindowsAuthenticationSchemes.Contains(s.AuthenticationScheme));
-                if (windowsSchemes.Any())
-                {
-                    providers.Add(new ExternalProvider
-                    {
-                        AuthenticationScheme = AccountOptions.WindowsAuthenticationSchemes.First(),
-                        DisplayName = AccountOptions.WindowsAuthenticationDisplayName
-                    });
-                }
-            }
 
             var allowLocal = true;
             if (context?.ClientId != null)
@@ -84,7 +69,7 @@ namespace Voidwell.VoidwellAuth.Client
                 }
             }
 
-            return new LoginViewModel
+            var model = new LoginViewModel
             {
                 AllowRememberLogin = AccountOptions.AllowRememberLogin,
                 EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
@@ -92,6 +77,8 @@ namespace Voidwell.VoidwellAuth.Client
                 Username = context?.LoginHint,
                 ExternalProviders = providers.ToArray()
             };
+
+            return model;
         }
 
         public async Task<LoginViewModel> BuildLoginViewModelAsync(AuthenticationRequest authRequest)
