@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Voidwell.Auth;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -23,13 +25,9 @@ namespace Voidwell.VoidwellAuth.Client
                     config.AddJsonFile("testsettings.json", true, true);
                     config.AddEnvironmentVariables();
                 })
-                .ConfigureLogging(builder =>
+                .ConfigureServices(services =>
                 {
-                    //builder.AddFilter("Microsoft", LogLevel.Error);
-                    builder.AddFilter("Microsoft.EntityFramework", LogLevel.Error);
-                    builder.AddFilter("Microsoft.AspNetCore.Hosting", LogLevel.Error);
-                    builder.AddFilter("Microsoft.AspNetCore.StaticFiles", LogLevel.Error);
-                    builder.AddDebug();
+                    services.AddSingleton<ILoggerFactory>(provider => new AuthLoggerFactory(LogLevel.Information));
                 })
                 .Build();
     }
