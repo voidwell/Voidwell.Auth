@@ -56,7 +56,34 @@ namespace Voidwell.Auth
             var logEvent = formatter(state, exception);
             var Timestamp = DateTime.Now;
 
-            Console.WriteLine($"[{logLevel} {Timestamp:HH:mm:ss.fff}] {_name}\n{logEvent} {exception}");
+            Console.Write("[");
+            WriteLogLevel(logLevel);
+            Console.WriteLine($"{logLevel} {Timestamp:HH:mm:ss.fff}] {_name}\n{logEvent} {exception}");
+        }
+
+        private static void WriteLogLevel(LogLevel logLevel)
+        {
+            switch (logLevel)
+            {
+                case LogLevel.Debug:
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    break;
+                case LogLevel.Information:
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    break;
+                case LogLevel.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case LogLevel.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case LogLevel.Critical:
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    break;
+            }
+
+            Console.Write(logLevel);
+            Console.ResetColor();
         }
     }
 }

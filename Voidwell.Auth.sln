@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dockerfile.debug = Dockerfile.debug
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Common", "src\Voidwell.Logging\Voidwell.Common.csproj", "{8573F301-D7B1-4F05-9228-B096FF2E7F8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,6 +44,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A1E308C2-645E-47BF-8FFD-042C97352793} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
+		{8573F301-D7B1-4F05-9228-B096FF2E7F8C} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8356B9-449C-421F-8C67-CAE7445379AC}

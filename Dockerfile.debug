@@ -2,13 +2,13 @@ FROM microsoft/dotnet:2.0.0-sdk
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 
-COPY ./src/Voidwell.Auth/Voidwell.Auth.csproj /tmp
+COPY ./src/Voidwell.Auth/*.csproj /tmp/
 COPY ./Directory.Build.props /
 
 WORKDIR /tmp
 
 RUN dotnet restore
 
-WORKDIR /app
+WORKDIR /app/Voidwell.Auth
 
 ENTRYPOINT dotnet watch run --no-launch-profile

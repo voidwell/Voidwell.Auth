@@ -38,12 +38,20 @@ namespace Voidwell.Auth.Data
 
             idsvBuilder.AddConfigurationStore(options =>
                 options.ConfigureDbContext = builder =>
-                    builder.UseNpgsql(dbOptions.DBConnectionString, b => b.MigrationsAssembly(_migrationAssembly)));
+                    builder.UseNpgsql(dbOptions.DBConnectionString, b =>
+                    {
+                        b.MigrationsAssembly(_migrationAssembly);
+                        b.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null);
+                    }));
 
             idsvBuilder.AddOperationalStore(options =>
             {
                 options.ConfigureDbContext = builder =>
-                    builder.UseNpgsql(dbOptions.DBConnectionString, b => b.MigrationsAssembly(_migrationAssembly));
+                    builder.UseNpgsql(dbOptions.DBConnectionString, b =>
+                    {
+                        b.MigrationsAssembly(_migrationAssembly);
+                        b.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null);
+                    });
 
                 options.EnableTokenCleanup = true;
                 options.TokenCleanupInterval = 3600;

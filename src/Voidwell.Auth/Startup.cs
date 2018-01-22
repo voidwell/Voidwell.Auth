@@ -10,14 +10,22 @@ using System;
 using Microsoft.AspNetCore.Http;
 using Voidwell.Auth.Delegation;
 using Voidwell.Auth.Clients;
+using Voidwell.Common.Logging;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Voidwell.VoidwellAuth.Client
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", true)
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         }
 
         public IConfiguration Configuration { get; }
@@ -39,6 +47,8 @@ namespace Voidwell.VoidwellAuth.Client
                 };
             });
 
+            services.ConfigureServiceProperties("voidwell.auth");
+
             services.AddEntityFrameworkContext(Configuration);
 
             services.AddAuthenticatedHttpClient();
@@ -46,7 +56,7 @@ namespace Voidwell.VoidwellAuth.Client
             services.AddTransient<Func<ITokenCreationService>>(a => () => a.GetService<ITokenCreationService>());
 
             services.AddTransient<IDelegationTokenValidationService, DelegationTokenValidationService>();
-            services.AddSingleton<IDelegationGrantValidationService, DelegationGrantValidationService>();
+            services.AddTransient<IDelegationGrantValidationService, DelegationGrantValidationService>();
 
             services.AddTransient<ICorsPolicyService, CorsPolicyService>();
             services.AddTransient<IProfileService, ProfileService>();
