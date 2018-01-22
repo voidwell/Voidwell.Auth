@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Serilog.Events;
+using System;
+using System.Collections.Generic;
 using Voidwell.Auth;
+using Voidwell.Common.Logging;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -11,24 +13,19 @@ namespace Voidwell.VoidwellAuth.Client
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
-        }
-
-        private static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+            var host = WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls("http://0.0.0.0:5000")
-                .ConfigureAppConfiguration((hostContext, config) =>
+                .UseCommonLogging(new LoggingOptions
                 {
-                    config.Sources.Clear();
-                    config.AddJsonFile("appsettings.json", true);
-                    config.AddJsonFile("testsettings.json", true, true);
-                    config.AddEnvironmentVariables();
-                })
-                .ConfigureServices(services =>
-                {
-                    services.AddSingleton<ILoggerFactory>(provider => new AuthLoggerFactory(LogLevel.Information));
+                    IgnoreRules = new List<Func<LogEvent, bool>>
+                    {
+                        TokenValidationLoggingDegrader.DegradeEvents
+                    }
                 })
                 .Build();
+
+            host.Run();
+        }
     }
 }

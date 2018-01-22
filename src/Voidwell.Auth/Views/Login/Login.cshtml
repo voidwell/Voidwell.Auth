@@ -6,31 +6,29 @@
             <img class="logo" src="~/images/voidwell-logo.png" />
         </div>
         @Html.Partial("_ValidationSummary")
-        <form asp-route="Login">
+        <form asp-route="Login" class="login-form">
             <input type="hidden" asp-for="ReturnUrl" />
-            <fieldset>
-                <div>
-                    <span class="input-label">Username</span>
-                    <div class="login-input">
-                        <input class="form-control" asp-for="Username" autofocus>
+            <div>
+                <span class="input-label">Username</span>
+                <div class="login-input-wrapper">
+                    <input class="login-form-input" asp-for="Username" autofocus>
+                </div>
+            </div>
+            <div>
+                <span class="input-label">Password</span>
+                <div class="login-input-wrapper">
+                    <input type="password" class="login-form-input" asp-for="Password" autocomplete="off">
+                </div>
+            </div>
+            <div>
+                <button class="login-button pull-right">Login</button>
+                <div class="login-remember">
+                    <div asp-for="RememberLogin">
+                        <span class="text">Remember me</span>
+                        <input class="pull-left" asp-for="RememberLogin">
                     </div>
                 </div>
-                <div>
-                    <span class="input-label">Password</span>
-                    <div class="login-input">
-                        <input type="password" class="form-control" asp-for="Password" autocomplete="off">
-                    </div>
-                </div>
-                <div class="bottom-row">
-                    <button class="login-button pull-right">Login</button>
-                    <div class="login-remember">
-                        <div asp-for="RememberLogin">
-                            <input asp-for="RememberLogin">
-                            <span class="text">Remember me</span>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
+            </div>
         </form>
         <div class="recover-password">
             <a href="http://localdev.com/account/resetpassword">Recover Password</a>

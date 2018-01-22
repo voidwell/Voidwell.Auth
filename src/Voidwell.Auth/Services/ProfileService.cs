@@ -44,14 +44,14 @@ namespace Voidwell.Auth.Services
             }
         }
 
-        public async Task IsActiveAsync(IsActiveContext context)
+        public Task IsActiveAsync(IsActiveContext context)
         {
             context.IsActive = false;
 
             if (!Guid.TryParse(context.Subject.GetSubjectId(), out Guid userId))
             {
                 _logger.LogInformation("no user");
-                return;
+                return Task.CompletedTask;
             }
 
             /*
@@ -72,6 +72,7 @@ namespace Voidwell.Auth.Services
             */
 
             context.IsActive = true;
+            return Task.CompletedTask;
         }
     }
 }
