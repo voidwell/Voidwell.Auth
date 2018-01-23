@@ -9,6 +9,7 @@ using Voidwell.Auth.Clients;
 using Voidwell.Auth.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace Voidwell.Auth.Services
 {
@@ -25,14 +26,18 @@ namespace Voidwell.Auth.Services
             _logger = logger;
         }
 
-        public async Task Authenticate(AuthenticationRequest authRequest)
+        public async Task<string> Authenticate(AuthenticationRequest authRequest)
         {
             var authResult = await _userManagementClient.Authenticate(authRequest);
-
             if (authResult == null)
-                return;
+                return null;
 
             _logger.LogDebug($"Got authentication result for user {authResult?.UserId.ToString()}");
+
+            if (authResult.Error != null)
+            {
+                return authResult.Error;
+            }
 
             var name = authResult.Claims.FirstOrDefault(a => a.Type == JwtClaimTypes.Name)?.Value;
 
@@ -51,6 +56,7 @@ namespace Voidwell.Auth.Services
             };
 
             await _httpContextAccessor.HttpContext.SignInAsync("voidwell", principal, authProps);
+            return null;
         }
 
         private static bool AdditionalClaimFilter(Claim claim)

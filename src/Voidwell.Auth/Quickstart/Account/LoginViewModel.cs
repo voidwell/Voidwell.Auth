@@ -19,5 +19,7 @@ namespace Voidwell.VoidwellAuth.Client
 
         public bool IsExternalLoginOnly => EnableLocalLogin == false && ExternalProviders?.Count() == 1;
         public string ExternalLoginScheme => ExternalProviders?.SingleOrDefault()?.AuthenticationScheme;
+
+        public string Error { get; set; }
     }
 }

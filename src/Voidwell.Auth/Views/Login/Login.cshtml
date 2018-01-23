@@ -1,11 +1,14 @@
 ﻿@model LoginViewModel
 
-<div class="login-page @(!ViewData.ModelState.IsValid ? "error" : "")">
+<div class="login-page @(!ViewData.ModelState.IsValid || ViewData.Model.Error != null ? "error" : "")">
     <div class="login-container">
         <div class="logo-wrapper">
             <img class="logo" src="~/images/voidwell-logo.png" />
         </div>
-        @Html.Partial("_ValidationSummary")
+        <div>
+            @Html.Partial("_ValidationSummary")
+            <div class="server-error">@(ViewData.Model.Error)</div>
+        </div>
         <form asp-route="Login" class="login-form">
             <input type="hidden" asp-for="ReturnUrl" />
             <div>

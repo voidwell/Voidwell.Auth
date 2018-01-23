@@ -8,5 +8,6 @@ namespace Voidwell.Auth.Models
     {
         public Guid UserId { get; set; }
         public List<Claim> Claims { get; set; }
+        public string Error { get; set; }
     }
 }
