@@ -5,6 +5,6 @@ namespace Voidwell.Auth.Services
 {
     public interface IAuthenticationService
     {
-        Task Authenticate(AuthenticationRequest authRequest);
+        Task<string> Authenticate(AuthenticationRequest authRequest);
     }
 }

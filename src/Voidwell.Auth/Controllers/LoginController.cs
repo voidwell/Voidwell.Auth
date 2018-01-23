@@ -55,7 +55,13 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
             {
                 try
                 {
-                    await _authenticationService.Authenticate(authRequest);
+                    var error = await _authenticationService.Authenticate(authRequest);
+                    if (error != null)
+                    {
+                        var tryAgainView = await _account.BuildLoginViewModelAsync(authRequest);
+                        tryAgainView.Error = error;
+                        return View(tryAgainView);
+                    }
                 }
                 catch(Exception)
                 {
