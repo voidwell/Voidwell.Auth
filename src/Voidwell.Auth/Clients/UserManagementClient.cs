@@ -24,7 +24,7 @@ namespace Voidwell.Auth.Clients
             var content = JsonContent.FromObject(authRequest);
             var response = await _httpClient.PostAsync("authenticate", content);
 
-            if (!response.IsSuccessStatusCode && response.Content != null)
+            if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.InternalServerError && response.Content != null)
             {
                 var error = await response.Content.ReadAsStringAsync();
                 return new AuthenticationResult
