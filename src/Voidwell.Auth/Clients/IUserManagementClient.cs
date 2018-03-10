@@ -12,5 +12,6 @@ namespace Voidwell.Auth.Clients
         Task<AuthenticationResult> Authenticate(AuthenticationRequest authRequest);
         Task<IEnumerable<Claim>> GetProfileClaimsAsync(Guid userId);
         Task<IEnumerable<SecurityQuestion>> GetSecurityQuestions(string username);
+        Task<IEnumerable<string>> GetRoles(string userId);
     }
 }

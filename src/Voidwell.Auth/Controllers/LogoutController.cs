@@ -81,7 +81,8 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
                 await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetDisplayName()));
             }
 
-            return View("LoggedOut", vm);
+            return Redirect(vm.PostLogoutRedirectUri);
+            //return View("LoggedOut", vm);
         }
     }
 }
