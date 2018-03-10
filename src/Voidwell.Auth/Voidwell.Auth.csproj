@@ -47,13 +47,7 @@
   </ItemGroup>
     
   <ItemGroup>
-    <ProjectReference Include="..\Voidwell.Logging\Voidwell.Common.csproj" Watch="false" />
-  </ItemGroup>
-    
-  <ItemGroup>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\Voidwell.Common\Voidwell.Common.csproj" Watch="false" />
   </ItemGroup>
     
   <ItemGroup>
