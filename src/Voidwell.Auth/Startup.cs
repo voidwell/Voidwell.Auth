@@ -67,16 +67,7 @@ namespace Voidwell.VoidwellAuth.Client
             services.AddTransient<IVoidwellResourceStore, VoidwellResourceStore>();
             services.AddSingleton<IUserManagementClient, UserManagementClient>();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy("localdev", policy =>
-                {
-                    policy.WithOrigins("http://localdev.com", "http://auth.localdev.com")
-                        .AllowAnyHeader()
-                        .AllowCredentials()
-                        .AllowAnyMethod();
-                });
-            });
+            services.AddCors();
 
             services.AddIdentityServer(options =>
                 {
@@ -84,6 +75,7 @@ namespace Voidwell.VoidwellAuth.Client
 
                     options.Discovery.ShowIdentityScopes = false;
                     options.Discovery.ShowApiScopes = false;
+                    options.Discovery.ResponseCacheInterval = 60 * 60;
 
                     options.InputLengthRestrictions.Scope = 800;
 
@@ -119,8 +111,6 @@ namespace Voidwell.VoidwellAuth.Client
 
             app.InitializeDatabases();
             app.SeedData();
-
-            app.UseCors("localdev");
 
             app.UseAuthentication();
 

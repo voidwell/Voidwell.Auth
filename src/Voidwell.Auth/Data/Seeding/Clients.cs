@@ -31,7 +31,7 @@ namespace Voidwell.Auth.Data.Seeding
                     IdentityTokenLifetime = 21600,
                     PostLogoutRedirectUris =
                     {
-                        "http://voidwell.com/",
+                        "https://voidwell.com/",
                         "http://voidwellclientui:5000/",
                         "http://localdev.com/",
                     },
@@ -39,18 +39,18 @@ namespace Voidwell.Auth.Data.Seeding
                     {
                         "http://voidwellclientui:5000/signInCallback.html",
                         "http://voidwellclientui:5000/",
-                        "http://voidwell.com/",
-                        "http://voidwell.com/signInCallback.html",
-                        "http://voidwell.com/silentCallback.html",
+                        "https://voidwell.com/",
+                        "https://voidwell.com/signInCallback.html",
+                        "https://voidwell.com/silentCallback.html",
                         "http://localdev.com/",
                         "http://localdev.com/signInCallback.html",
                         "http://localdev.com/silentCallback.html"
                     },
                     AllowedCorsOrigins =
                     {
-                        "http://voidwell.com/",
-                        "http://voidwellclientui:5000/",
-                        "http://localdev.com/"
+                        "https://voidwell.com",
+                        "http://voidwellclientui:5000",
+                        "http://localdev.com"
                     }
                 },
                 new Client

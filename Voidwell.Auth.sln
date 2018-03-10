@@ -3,21 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoidwellAuthMVCClient", "src\VoidwellAuthMVCClient\VoidwellAuthMVCClient.csproj", "{A1E308C2-645E-47BF-8FFD-042C97352793}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Auth", "src\Voidwell.Auth\Voidwell.Auth.csproj", "{3CB8DA74-429F-4896-958E-B45B3F7FDB37}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BAF62441-142F-4DCF-9047-17E25F4F302E}"
 	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		Dockerfile = Dockerfile
 		Dockerfile.debug = Dockerfile.debug
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Common", "src\Voidwell.Logging\Voidwell.Common.csproj", "{8573F301-D7B1-4F05-9228-B096FF2E7F8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Common", "src\Voidwell.Common\Voidwell.Common.csproj", "{8573F301-D7B1-4F05-9228-B096FF2E7F8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +24,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A1E308C2-645E-47BF-8FFD-042C97352793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1E308C2-645E-47BF-8FFD-042C97352793}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1E308C2-645E-47BF-8FFD-042C97352793}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1E308C2-645E-47BF-8FFD-042C97352793}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,7 +37,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A1E308C2-645E-47BF-8FFD-042C97352793} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{8573F301-D7B1-4F05-9228-B096FF2E7F8C} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 	EndGlobalSection
