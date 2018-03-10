@@ -48,6 +48,12 @@ namespace Voidwell.Auth.Clients
             return await response.GetContentAsync<IEnumerable<SecurityQuestion>>();
         }
 
+        public async Task<IEnumerable<string>> GetRoles(string userId)
+        {
+            var response = await _httpClient.GetAsync($"roles/{userId}");
+            return await response.GetContentAsync<IEnumerable<string>>();
+        }
+
         public void Dispose()
         {
             _httpClient.Dispose();

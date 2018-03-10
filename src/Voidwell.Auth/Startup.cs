@@ -10,8 +10,9 @@ using System;
 using Microsoft.AspNetCore.Http;
 using Voidwell.Auth.Delegation;
 using Voidwell.Auth.Clients;
-using Voidwell.Common.Logging;
 using System.IdentityModel.Tokens.Jwt;
+using Voidwell.Auth;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -52,6 +53,7 @@ namespace Voidwell.VoidwellAuth.Client
             services.AddEntityFrameworkContext(Configuration);
 
             services.AddAuthenticatedHttpClient();
+            services.AddSingleton<IClaimsTransformation, ClaimsTransformer>();
 
             services.AddTransient<Func<ITokenCreationService>>(a => () => a.GetService<ITokenCreationService>());
 
@@ -60,7 +62,9 @@ namespace Voidwell.VoidwellAuth.Client
 
             services.AddTransient<ICorsPolicyService, CorsPolicyService>();
             services.AddTransient<IProfileService, ProfileService>();
-            services.AddTransient<IAuthenticationService, AuthenticationService>();
+            services.AddTransient<Auth.Services.IAuthenticationService, Auth.Services.AuthenticationService>();
+            services.AddTransient<IVoidwellClientStore, VoidwellClientStore>();
+            services.AddTransient<IVoidwellResourceStore, VoidwellResourceStore>();
             services.AddSingleton<IUserManagementClient, UserManagementClient>();
 
             services.AddCors(options =>
