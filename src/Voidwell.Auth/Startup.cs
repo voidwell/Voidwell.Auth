@@ -13,6 +13,7 @@ using Voidwell.Auth.Clients;
 using System.IdentityModel.Tokens.Jwt;
 using Voidwell.Auth;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -112,6 +113,8 @@ namespace Voidwell.VoidwellAuth.Client
             app.InitializeDatabases();
             app.SeedData();
 
+            app.UseForwardedHeaders(GetForwardedHeaderOptions());
+
             app.UseAuthentication();
 
             app.UseStaticFiles();
@@ -119,6 +122,21 @@ namespace Voidwell.VoidwellAuth.Client
             app.UseIdentityServer();
 
             app.UseMvc();
+        }
+
+        private static ForwardedHeadersOptions GetForwardedHeaderOptions()
+        {
+            var options = new ForwardedHeadersOptions
+            {
+                RequireHeaderSymmetry = false,
+                ForwardLimit = 15,
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            };
+
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+
+            return options;
         }
     }
 }
