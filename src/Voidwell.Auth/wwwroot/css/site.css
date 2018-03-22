@@ -37,13 +37,25 @@ h1 {
     line-height: 30px;
 }
 
-.login-page {
+.login-page,
+.logout-page,
+.logged-out {
     color: #fff;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 12px;
+}
+
+.logged-out .signout {
+    border: none;
+}
+
+.logged-out a.PostLogoutRedirectUri {
+    color: #7b7b7b;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .icon-banner,
@@ -121,8 +133,7 @@ h1 {
     opacity: 0.3;
 }
 
-.login-page .login-button {
-    float: right;
+button {
     color: #fff;
     background-color: #32373c;
     border: none !important;
