@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Newtonsoft.Json.Linq;
 
 namespace Voidwell.VoidwellAuth.Client.Controllers
 {
@@ -55,12 +56,28 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
             var vm = await _account.BuildLoggedOutViewModelAsync(model.LogoutId);
+
+            var user = HttpContext.User;
+            if (user?.Identity.IsAuthenticated == true)
+            {
+                // delete local authentication cookie
+                await HttpContext.SignOutAsync();
+
+                // raise the logout event
+                await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetDisplayName()));
+            }
+
+            // check if we need to trigger sign-out at an upstream identity provider
             if (vm.TriggerExternalSignout)
             {
+                // build a return URL so the upstream provider will redirect back
+                // to us after the user has logged out. this allows us to then
+                // complete our single sign-out processing.
                 string url = Url.Action("Logout", new { logoutId = vm.LogoutId });
+
+                // hack: try/catch to handle social providers that throw
                 try
                 {
-                    // hack: try/catch to handle social providers that throw
                     await HttpContext.SignOutAsync(vm.ExternalAuthenticationScheme,
                         new AuthenticationProperties { RedirectUri = url });
                 }
@@ -72,17 +89,12 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
                 }
             }
 
-            // delete local authentication cookie
-            await HttpContext.SignOutAsync();
-
-            var user = HttpContext.User;
-            if (user != null)
+            if (vm.AutomaticRedirectAfterSignOut && vm.PostLogoutRedirectUri != null)
             {
-                await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetDisplayName()));
+                return Redirect(vm.PostLogoutRedirectUri);
             }
 
-            return Redirect(vm.PostLogoutRedirectUri);
-            //return View("LoggedOut", vm);
+            return View("LoggedOut", vm);
         }
     }
 }

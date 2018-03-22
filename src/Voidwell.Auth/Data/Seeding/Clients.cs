@@ -6,7 +6,7 @@ namespace Voidwell.Auth.Data.Seeding
 {
     public static class Clients
     {
-        public static IEnumerable<Client> GetClients()
+        public static IEnumerable<Client> GetSeeds()
         {
             return new List<Client>
             {

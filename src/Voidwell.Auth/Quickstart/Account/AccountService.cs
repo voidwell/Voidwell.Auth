@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace Voidwell.VoidwellAuth.Client
 {

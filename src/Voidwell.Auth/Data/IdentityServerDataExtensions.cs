@@ -8,7 +8,6 @@ using System.Reflection;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using System.Linq;
-using IdentityServer4.Models;
 using System.Collections.Generic;
 
 namespace Voidwell.Auth.Data
@@ -80,28 +79,37 @@ namespace Voidwell.Auth.Data
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
 
-                if (!context.Clients.Any())
+                var dbClients = dbContext.Clients.ToList();
+                var dbApiResources = dbContext.ApiResources.ToList();
+                var dbIdentityResources = dbContext.IdentityResources;
+
+                foreach (var client in Seeding.Clients.GetSeeds().Select(a => a.ToEntity()))
                 {
-                    var clients = Seeding.Clients.GetClients().Select(a => a.ToEntity());
-                    context.Clients.AddRange(clients);
+                    if (!dbClients.Any(a => a.ClientId == client.ClientId))
+                    {
+                        dbContext.Add(client);
+                    }
                 }
 
-                if (!context.ApiResources.Any())
+                foreach (var apiResource in Seeding.ApiResources.GetSeeds().Select(a => a.ToEntity()))
                 {
-                    var apiResources = Seeding.ApiResources.GetApiResources().Select(a => a.ToEntity());
-                    context.ApiResources.AddRange(apiResources);
+                    if (!dbApiResources.Any(a => a.Name == apiResource.Name))
+                    {
+                        dbContext.Add(apiResource);
+                    }
                 }
 
-                if (!context.IdentityResources.Any())
+                foreach (var identityResource in Seeding.IdentResources.GetSeeds().Select(a => a.ToEntity()))
                 {
-                    context.IdentityResources.Add(new IdentityResources.OpenId().ToEntity());
-                    context.IdentityResources.Add(new IdentityResources.Profile().ToEntity());
-                    context.IdentityResources.Add(new IdentityResources.Email().ToEntity());
+                    if (!dbIdentityResources.Any(a => a.Name == identityResource.Name))
+                    {
+                        dbContext.Add(identityResource);
+                    }
                 }
 
-                context.SaveChanges();
+                dbContext.SaveChanges();
             }
 
             return app;

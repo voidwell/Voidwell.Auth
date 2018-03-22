@@ -5,7 +5,7 @@ namespace Voidwell.Auth.Data.Seeding
 {
     public static class ApiResources
     {
-        public static IEnumerable<ApiResource> GetApiResources()
+        public static IEnumerable<ApiResource> GetSeeds()
         {
             return new List<ApiResource>
             {

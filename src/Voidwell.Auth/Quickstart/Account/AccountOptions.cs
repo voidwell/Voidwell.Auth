@@ -13,7 +13,7 @@ namespace Voidwell.VoidwellAuth.Client
         public static TimeSpan RememberMeLoginDuration = TimeSpan.FromDays(30);
 
         public static bool ShowLogoutPrompt = true;
-        public static bool AutomaticRedirectAfterSignOut = false;
+        public static bool AutomaticRedirectAfterSignOut = true;
 
         // to enable windows authentication, the host (IIS or IIS Express) also must have 
         // windows auth enabled.
