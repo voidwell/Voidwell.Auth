@@ -14,6 +14,11 @@ using System.IdentityModel.Tokens.Jwt;
 using Voidwell.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
+using IdentityModel;
+using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -35,11 +40,21 @@ namespace Voidwell.VoidwellAuth.Client
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
+            services.AddMvcCore()
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                })
+                .AddDataAnnotations()
+                .AddAuthorization(options =>
+                {
+                    options.AddPolicy("IsAdmin",
+                        policy => policy.AddAuthenticationSchemes("Bearer")
+                                        .RequireClaim(JwtClaimTypes.Scope, "voidwell-auth-admin"));
                 });
+            services.AddMvc();
+
+
             services.AddAntiforgery(options =>
             {
                 options.Cookie = new CookieBuilder
@@ -99,6 +114,13 @@ namespace Voidwell.VoidwellAuth.Client
                         Name = "voidwell",
                         SecurePolicy = CookieSecurePolicy.SameAsRequest
                     };
+                })
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = "http://voidwellauth:5000";
+                    options.Audience = "voidwell-auth";
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
                 });
         }
 

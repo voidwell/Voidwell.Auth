@@ -10,7 +10,7 @@ namespace Voidwell.Auth.Controllers
 {
     [Route("admin")]
     [SecurityHeaders]
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize("IsAdmin")]
     public class AdminController : Controller
     {
         private readonly IVoidwellClientStore _clientStore;
