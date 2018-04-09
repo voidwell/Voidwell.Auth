@@ -77,6 +77,23 @@ namespace Voidwell.Auth.Data.Seeding
                             DisplayName = "Voidwell Bungie.Net"
                         }
                     }
+                },
+                new ApiResource
+                {
+                    Name = "voidwell-auth",
+                    DisplayName = "Voidwell Auth Admin",
+                    ApiSecrets =
+                    {
+                        new Secret("authApiResourceSecret".Sha256())
+                    },
+                    Scopes =
+                    {
+                        new Scope
+                        {
+                            Name = "voidwell-auth-admin",
+                            DisplayName = "Voidwell Auth Admin Management"
+                        }
+                    }
                 }
             };
         }

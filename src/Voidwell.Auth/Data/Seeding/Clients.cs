@@ -85,7 +85,8 @@ namespace Voidwell.Auth.Data.Seeding
                         "voidwell-daybreakgames",
                         "voidwell-bungienet",
                         "voidwell-usermanagement",
-                        "voidwell-internal"
+                        "voidwell-internal",
+                        "voidwell-auth-admin"
                     },
                     AccessTokenType = AccessTokenType.Jwt,
                     AccessTokenLifetime = 21600

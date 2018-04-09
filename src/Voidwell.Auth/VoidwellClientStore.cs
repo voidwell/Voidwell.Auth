@@ -25,7 +25,7 @@ namespace Voidwell.Auth
             var clients = await _context.Clients
                 .ToListAsync();
 
-            var models = clients.Select(a => a.ToModel());
+            var models = clients.Select(a => a.ToModel()).OrderBy(a => a.ClientId);
             return models;
         }
 
