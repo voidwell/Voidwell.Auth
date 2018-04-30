@@ -148,6 +148,24 @@ namespace Voidwell.Auth.Data.Seeding
                     },
                     AccessTokenType = AccessTokenType.Jwt,
                     AccessTokenLifetime = 21600
+                },
+                new Client
+                {
+                    ClientId = "mutterblack",
+                    ClientName = "Mutterblack",
+                    AllowedGrantTypes = new List<string> { GrantType.ClientCredentials },
+
+                    ClientSecrets =
+                    {
+                        new Secret("mutterblackSecret".Sha256())
+                    },
+                    AllowedScopes = new List<string>
+                    {
+                        "voidwell-daybreakgames",
+                        "voidwell-api"
+                    },
+                    AccessTokenType = AccessTokenType.Jwt,
+                    AccessTokenLifetime = 21600
                 }
             };
         }
