@@ -11,7 +11,15 @@ namespace Voidwell.Auth.Data.Seeding
             {
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
-                new IdentityResources.Email()
+                new IdentityResources.Email(),
+                new IdentityResource
+                {
+                    Name = "voidwell-roles",
+                    UserClaims = new[]
+                    {
+                        "role"
+                    }
+                }
             };
         }
     }
