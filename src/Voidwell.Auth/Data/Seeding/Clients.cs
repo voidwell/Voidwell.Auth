@@ -166,6 +166,46 @@ namespace Voidwell.Auth.Data.Seeding
                     },
                     AccessTokenType = AccessTokenType.Jwt,
                     AccessTokenLifetime = 21600
+                },
+                new Client
+                {
+                    ClientId = "voidwell-filewell",
+                    ClientName = "Voidwell FileWell UI",
+                    AllowedGrantTypes = { GrantType.Hybrid },
+                    RequireConsent = false,
+
+                    ClientSecrets = { new Secret("e4188ecc-2095-4528-9353-0a22c896a39c".Sha256()) },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        "voidwell-roles"
+                    },
+                    AllowOfflineAccess = true,
+
+                    PostLogoutRedirectUris =
+                    {
+                        "http://f.localdev.com/signout-callback-oidc",
+                        "http://localhost:5000/signout-callback-oidc",
+                        "https://f.voidwell.com/signout-callback-oidc"
+                    },
+                    RedirectUris =
+                    {
+                        "https://f.voidwell.com/signin-oidc",
+                        "http://f.localdev.com/signin-oidc",
+                        "http://localhost:5000/signin-oidc"
+                    },
+                    AllowedCorsOrigins =
+                    {
+                        "https://voidwell.com",
+                        "https://f.voidwell.com",
+                        "http://voidwellfilewell:5000",
+                        "http://localdev.com",
+                        "http://f.localdev.com",
+                        "http://localhost",
+                    }
                 }
             };
         }

@@ -52,6 +52,7 @@ namespace Voidwell.VoidwellAuth.Client
                         policy => policy.AddAuthenticationSchemes("Bearer")
                                         .RequireClaim(JwtClaimTypes.Scope, "voidwell-auth-admin"));
                 });
+                //.AddCors();
             services.AddMvc();
 
 
