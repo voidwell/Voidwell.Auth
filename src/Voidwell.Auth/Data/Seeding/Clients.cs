@@ -146,6 +146,10 @@ namespace Voidwell.Auth.Data.Seeding
                     {
                         new Secret("daybreakGamesSecret".Sha256())
                     },
+                    AllowedScopes = new List<string>
+                    {
+                        "voidwell-messagewell-publish"
+                    },
                     AccessTokenType = AccessTokenType.Jwt,
                     AccessTokenLifetime = 21600
                 },
