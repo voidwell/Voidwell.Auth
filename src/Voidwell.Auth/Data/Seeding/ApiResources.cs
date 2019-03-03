@@ -94,6 +94,23 @@ namespace Voidwell.Auth.Data.Seeding
                             DisplayName = "Voidwell Auth Admin Management"
                         }
                     }
+                },
+                new ApiResource
+                {
+                    Name = "voidwell-messagewell",
+                    DisplayName = "Voidwell Messagewell",
+                    ApiSecrets =
+                    {
+                        new Secret("messagewellResourceSecret".Sha256())
+                    },
+                    Scopes =
+                    {
+                        new Scope
+                        {
+                            Name = "voidwell-messagewell-publish",
+                            DisplayName = "Voidwell Messagewell Publish Access"
+                        }
+                    }
                 }
             };
         }
