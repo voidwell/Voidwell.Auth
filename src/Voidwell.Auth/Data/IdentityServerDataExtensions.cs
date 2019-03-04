@@ -9,8 +9,6 @@ using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using System.Linq;
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using IdentityServer4.EntityFramework.Entities;
 
 namespace Voidwell.Auth.Data
