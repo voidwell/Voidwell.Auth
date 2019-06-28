@@ -15,10 +15,7 @@ using Voidwell.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using IdentityModel;
-using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Voidwell.Logging;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -28,8 +25,14 @@ namespace Voidwell.VoidwellAuth.Client
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", true)
-                .AddEnvironmentVariables();
+                .AddJsonFile("appsettings.json", true);
+
+            if (env.IsDevelopment())
+            {
+                builder.AddJsonFile("devsettings.json", true, true);
+            }
+
+            builder.AddEnvironmentVariables();
 
             Configuration = builder.Build();
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -132,6 +135,8 @@ namespace Voidwell.VoidwellAuth.Client
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseLoggingMiddleware();
 
             app.InitializeDatabases();
             app.SeedData();

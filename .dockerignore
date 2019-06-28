@@ -1,2 +1,8 @@
 bin\
 obj\
+.vs
+.git
+.dockerignore
+.gitignore
+.gitattributes
+build

@@ -3,24 +3,29 @@
 <div class="login-page @(!ViewData.ModelState.IsValid || ViewData.Model.Error != null ? "error" : "")">
     <div class="login-container">
         <div class="logo-wrapper">
-            <img class="logo" src="~/images/voidwell-logo.png" />
+            <svg class="logo" viewBox="0 0 1031 422" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,0H304L515,292,726,0h305L727,422,638,299l46-65,43,58L883,75H766L515,422,264,75H148L304,292l43-58,46,65L304,422ZM515,0l84,115-46,65-38-51-37,51-46-65Z" />
+            </svg>
         </div>
-        <div>
+        <div class="validation-text">
             @Html.Partial("_ValidationSummary")
             <div class="server-error">@(ViewData.Model.Error)</div>
         </div>
         <form asp-route="Login" class="login-form">
             <input type="hidden" asp-for="ReturnUrl" />
-            <div>
-                <span class="input-label">Username</span>
-                <div class="login-input-wrapper">
-                    <input class="login-form-input" asp-for="Username" autofocus>
-                </div>
-            </div>
-            <div>
-                <span class="input-label">Password</span>
-                <div class="login-input-wrapper">
-                    <input type="password" class="login-form-input" asp-for="Password" autocomplete="off">
+            <div class="form-input-group">
+                <label for="username" class="form-input">
+                    <input type="text" asp-for="Username" placeholder="&nbsp;" autofocus>
+                    <span class="label">Username</span>
+                    <span class="border"></span>
+                </label>
+                <label for="password" class="form-input">
+                    <input type="password" asp-for="Password" placeholder="&nbsp;">
+                    <span class="label">Password</span>
+                    <span class="border"></span>
+                </label>
+                <div class="recover-password">
+                    <a href="https://voidwell.com/account/resetpassword">Forgot Password?</a>
                 </div>
             </div>
             <div>
@@ -33,8 +38,5 @@
                 </div>
             </div>
         </form>
-        <div class="recover-password">
-            <a href="https://voidwell.com/account/resetpassword">Recover Password</a>
-        </div>
     </div>    
 </div>

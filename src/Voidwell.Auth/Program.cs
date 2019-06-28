@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Serilog.Events;
-using System;
-using System.Collections.Generic;
-using Voidwell.Auth;
-using Voidwell.Common.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Voidwell.Logging;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -12,19 +10,41 @@ namespace Voidwell.VoidwellAuth.Client
     {
         public static void Main(string[] args)
         {
-            var host = WebHost.CreateDefaultBuilder(args)
+            BuildWebHost(args).Run();
+        }
+
+        public static IWebHost BuildWebHost(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .UseUrls("http://0.0.0.0:5000")
-                .UseCommonLogging(new LoggingOptions
+                .ConfigureLogging((context, builder) =>
                 {
-                    IgnoreRules = new List<Func<LogEvent, bool>>
+                    builder.ClearProviders();
+
+                    var useGelf = context.Configuration.GetValue("UseGelfLogging", false);
+
+                    builder.SetMinimumLevel(LogLevel.Information);
+
+                    builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+                    builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
+                    builder.AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.None);
+                    builder.AddFilter("Microsoft.EntityframeworkCore.Database.Command", LogLevel.None);
+
+                    var o = new LoggerFilterOptions();
+
+                    if (useGelf && !context.HostingEnvironment.IsDevelopment())
                     {
-                        TokenValidationLoggingDegrader.DegradeEvents
+                        builder.AddGelf(options =>
+                        {
+                            options.LogSource = "Voidwell.Auth";
+                        });
+                    }
+                    else
+                    {
+                        builder.AddConsole();
+                        builder.AddDebug();
                     }
                 })
                 .Build();
-
-            host.Run();
-        }
     }
 }
