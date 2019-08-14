@@ -6,7 +6,7 @@ namespace Voidwell.Auth.Data.Seeding
 {
     public static class Clients
     {
-        public static IEnumerable<Client> GetSeeds()
+        public static IEnumerable<Client> GetSeeds(SeedingOptions options)
         {
             return new List<Client>
             {
@@ -61,7 +61,7 @@ namespace Voidwell.Auth.Data.Seeding
 
                     ClientSecrets =
                     {
-                        new Secret("authSecret".Sha256())
+                        new Secret(options.AuthClientSecret.Sha256())
                     },
                     AllowedScopes = new List<string>
                     {
@@ -78,7 +78,7 @@ namespace Voidwell.Auth.Data.Seeding
 
                     ClientSecrets =
                     {
-                        new Secret("apiSecret".Sha256())
+                        new Secret(options.ApiClientSecret.Sha256())
                     },
                     AllowedScopes = new List<string>
                     {
@@ -99,7 +99,7 @@ namespace Voidwell.Auth.Data.Seeding
 
                     ClientSecrets =
                     {
-                        new Secret("userManagementSecret".Sha256())
+                        new Secret(options.UserManagementClientSecret.Sha256())
                     },
                     AccessTokenType = AccessTokenType.Jwt,
                     AccessTokenLifetime = 21600
@@ -112,7 +112,7 @@ namespace Voidwell.Auth.Data.Seeding
 
                     ClientSecrets =
                     {
-                        new Secret("internalSecret".Sha256())
+                        new Secret(options.InternalClientSecret.Sha256())
                     },
                     AllowedScopes = new List<string>
                     {
@@ -131,7 +131,7 @@ namespace Voidwell.Auth.Data.Seeding
 
                     ClientSecrets =
                     {
-                        new Secret("bungieNetSecret".Sha256())
+                        new Secret(options.BungieNetClientSecret.Sha256())
                     },
                     AccessTokenType = AccessTokenType.Jwt,
                     AccessTokenLifetime = 21600
@@ -144,7 +144,7 @@ namespace Voidwell.Auth.Data.Seeding
 
                     ClientSecrets =
                     {
-                        new Secret("daybreakGamesSecret".Sha256())
+                        new Secret(options.DaybreakGamesClientSecret.Sha256())
                     },
                     AllowedScopes = new List<string>
                     {
@@ -161,7 +161,7 @@ namespace Voidwell.Auth.Data.Seeding
 
                     ClientSecrets =
                     {
-                        new Secret("mutterblackSecret".Sha256())
+                        new Secret(options.MutterblackClientSecret.Sha256())
                     },
                     AllowedScopes = new List<string>
                     {
@@ -178,8 +178,10 @@ namespace Voidwell.Auth.Data.Seeding
                     AllowedGrantTypes = { GrantType.Hybrid },
                     RequireConsent = false,
 
-                    ClientSecrets = { new Secret("e4188ecc-2095-4528-9353-0a22c896a39c".Sha256()) },
-
+                    ClientSecrets =
+                    {
+                        new Secret(options.FilewellClientSecret.Sha256())
+                    },
                     AllowedScopes =
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
@@ -188,7 +190,6 @@ namespace Voidwell.Auth.Data.Seeding
                         "voidwell-roles"
                     },
                     AllowOfflineAccess = true,
-
                     PostLogoutRedirectUris =
                     {
                         "http://f.localdev.com/signout-callback-oidc",

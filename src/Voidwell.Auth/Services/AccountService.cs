@@ -7,11 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
 using System;
-using Newtonsoft.Json.Linq;
 
-namespace Voidwell.VoidwellAuth.Client
+namespace Voidwell.Auth.Services
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
@@ -41,7 +40,7 @@ namespace Voidwell.VoidwellAuth.Client
                     EnableLocalLogin = false,
                     ReturnUrl = returnUrl,
                     Username = context?.LoginHint,
-                    ExternalProviders = new ExternalProvider[] {new ExternalProvider { AuthenticationScheme = context.IdP } }
+                    ExternalProviders = new ExternalProvider[] { new ExternalProvider { AuthenticationScheme = context.IdP } }
                 };
             }
 

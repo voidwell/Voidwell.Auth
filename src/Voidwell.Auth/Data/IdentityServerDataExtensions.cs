@@ -22,8 +22,7 @@ namespace Voidwell.Auth.Data
             services.AddOptions();
             services.AddSingleton(impl => impl.GetRequiredService<IOptions<DatabaseOptions>>().Value);
             services.Configure<DatabaseOptions>(configuration);
-
-            var options = configuration.Get<DatabaseOptions>();
+            services.Configure<SeedingOptions>(configuration);
 
             services.AddEntityFrameworkNpgsql();
 
@@ -78,6 +77,8 @@ namespace Voidwell.Auth.Data
 
         public static IApplicationBuilder SeedData(this IApplicationBuilder app)
         {
+            var seedingOptions = app.ApplicationServices.GetRequiredService<IOptions<SeedingOptions>>();
+
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
@@ -86,7 +87,7 @@ namespace Voidwell.Auth.Data
                 var dbApiResources = dbContext.ApiResources.Include(a => a.Scopes).Include(a => a.Secrets).ToList();
                 var dbIdentityResources = dbContext.IdentityResources;
 
-                foreach (var client in Seeding.Clients.GetSeeds().Select(a => a.ToEntity()))
+                foreach (var client in Seeding.Clients.GetSeeds(seedingOptions.Value).Select(a => a.ToEntity()))
                 {
                     if (!dbClients.Any(a => a.ClientId == client.ClientId))
                     {
@@ -146,7 +147,7 @@ namespace Voidwell.Auth.Data
                     }
                 }
 
-                foreach (var apiResource in Seeding.ApiResources.GetSeeds().Select(a => a.ToEntity()))
+                foreach (var apiResource in Seeding.ApiResources.GetSeeds(seedingOptions.Value).Select(a => a.ToEntity()))
                 {
                     if (!dbApiResources.Any(a => a.Name == apiResource.Name))
                     {

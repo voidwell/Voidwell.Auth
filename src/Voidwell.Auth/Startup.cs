@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Voidwell.Auth.Delegation;
 using Voidwell.Auth.Clients;
 using System.IdentityModel.Tokens.Jwt;
-using Voidwell.Auth;
+using Voidwell.Auth.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using IdentityModel;
@@ -86,6 +86,8 @@ namespace Voidwell.VoidwellAuth.Client
             services.AddTransient<IVoidwellClientStore, VoidwellClientStore>();
             services.AddTransient<IVoidwellResourceStore, VoidwellResourceStore>();
             services.AddSingleton<IUserManagementClient, UserManagementClient>();
+            services.AddTransient<IAccountService, AccountService>();
+            services.AddTransient<Auth.Services.IConsentService, ConsentService>();
 
             services.AddCors();
 

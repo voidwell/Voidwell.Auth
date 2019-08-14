@@ -5,7 +5,7 @@ namespace Voidwell.Auth.Data.Seeding
 {
     public static class ApiResources
     {
-        public static IEnumerable<ApiResource> GetSeeds()
+        public static IEnumerable<ApiResource> GetSeeds(SeedingOptions options)
         {
             return new List<ApiResource>
             {
@@ -15,7 +15,7 @@ namespace Voidwell.Auth.Data.Seeding
                     DisplayName = "Voidwell Api",
                     ApiSecrets =
                     {
-                        new Secret("adminApiResourceSecret".Sha256())
+                        new Secret(options.ApiResourceSecret.Sha256())
                     },
                     Scopes =
                     {
@@ -84,7 +84,7 @@ namespace Voidwell.Auth.Data.Seeding
                     DisplayName = "Voidwell Auth Admin",
                     ApiSecrets =
                     {
-                        new Secret("authApiResourceSecret".Sha256())
+                        new Secret(options.AuthApiResourceSecret.Sha256())
                     },
                     Scopes =
                     {
@@ -101,7 +101,7 @@ namespace Voidwell.Auth.Data.Seeding
                     DisplayName = "Voidwell Messagewell",
                     ApiSecrets =
                     {
-                        new Secret("messagewellResourceSecret".Sha256())
+                        new Secret(options.MessagewellResourceSecret.Sha256())
                     },
                     Scopes =
                     {

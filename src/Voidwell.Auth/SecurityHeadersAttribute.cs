@@ -1,11 +1,7 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Voidwell.VoidwellAuth.Client
+namespace Voidwell.Auth
 {
     public class SecurityHeadersAttribute : ActionFilterAttribute
     {
@@ -26,7 +22,7 @@ namespace Voidwell.VoidwellAuth.Client
                 var csp = "default-src 'self';";
                 // an example if you need client images to be displayed from twitter
                 //var csp = "default-src 'self'; img-src 'self' https://pbs.twimg.com";
-                
+
                 // once for standards compliant browsers
                 if (!context.HttpContext.Response.Headers.ContainsKey("Content-Security-Policy"))
                 {

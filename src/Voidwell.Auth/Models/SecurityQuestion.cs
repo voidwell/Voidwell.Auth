@@ -1,4 +1,4 @@
-﻿namespace Voidwell.Auth.Quickstart.Account
+﻿namespace Voidwell.Auth.Models
 {
     public class SecurityQuestion
     {

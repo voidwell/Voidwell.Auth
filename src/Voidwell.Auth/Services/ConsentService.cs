@@ -1,28 +1,21 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using IdentityServer4.Models;
+﻿using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
+using Voidwell.Auth.Models;
 
-namespace Voidwell.VoidwellAuth.Client
+namespace Voidwell.Auth.Services
 {
-    public class ConsentService
+    public class ConsentService : IConsentService
     {
+        private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IResourceStore _resourceStore;
-        private readonly IIdentityServerInteractionService _interaction;
-        private readonly ILogger _logger;
+        private readonly ILogger<ConsentService> _logger;
 
-        public ConsentService(
-            IIdentityServerInteractionService interaction,
-            IClientStore clientStore,
-            IResourceStore resourceStore,
-            ILogger logger)
+        public ConsentService(IIdentityServerInteractionService interaction, IClientStore clientStore, IResourceStore resourceStore, ILogger<ConsentService> logger)
         {
             _interaction = interaction;
             _clientStore = clientStore;
@@ -122,8 +115,8 @@ namespace Voidwell.VoidwellAuth.Client
         }
 
         private ConsentViewModel CreateConsentViewModel(
-            ConsentInputModel model, string returnUrl, 
-            AuthorizationRequest request, 
+            ConsentInputModel model, string returnUrl,
+            AuthorizationRequest request,
             IdentityServer4.Models.Client client, Resources resources)
         {
             var vm = new ConsentViewModel();
@@ -188,4 +181,3 @@ namespace Voidwell.VoidwellAuth.Client
         }
     }
 }
-

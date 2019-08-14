@@ -6,3 +6,7 @@ obj\
 .gitignore
 .gitattributes
 build
+testsettings.json
+devsettings.json
+.bat
+.sh

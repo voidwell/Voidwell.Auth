@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
-using Voidwell.Auth.Quickstart.Account;
 
 namespace Voidwell.Auth.Clients
 {

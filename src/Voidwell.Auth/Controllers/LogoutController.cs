@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication;
-using Newtonsoft.Json.Linq;
+using Voidwell.Auth;
+using Voidwell.Auth.Services;
+using Voidwell.Auth.Models;
 
 namespace Voidwell.VoidwellAuth.Client.Controllers
 {

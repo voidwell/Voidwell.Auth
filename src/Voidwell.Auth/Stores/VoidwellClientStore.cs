@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using IdentityServer4.EntityFramework.Mappers;
 
-namespace Voidwell.Auth
+namespace Voidwell.Auth.Stores
 {
     public class VoidwellClientStore : ClientStore, IVoidwellClientStore
     {
