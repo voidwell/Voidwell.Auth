@@ -5,7 +5,6 @@ using Voidwell.Auth.HttpAuthenticatedClient;
 using Voidwell.Auth.Models;
 using System.Collections.Generic;
 using System.Security.Claims;
-using Voidwell.Auth.Quickstart.Account;
 
 namespace Voidwell.Auth.Clients
 {

@@ -1,11 +1,10 @@
 ﻿using IdentityServer4.Services;
-using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
-using Microsoft.AspNetCore.Authentication;
+using Voidwell.Auth;
+using Voidwell.Auth.Services;
 
 namespace Voidwell.VoidwellAuth.Client.Controllers
 {
@@ -14,23 +13,14 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
     public class LoginController : Controller
     {
         private readonly IIdentityServerInteractionService _interaction;
-        private readonly IEventService _events;
-        private readonly AccountService _account;
+        private readonly IAccountService _accountService;
         private readonly Auth.Services.IAuthenticationService _authenticationService;
 
-        public LoginController(
-            IIdentityServerInteractionService interaction,
-            IClientStore clientStore,
-            IHttpContextAccessor httpContextAccessor,
-            IEventService events,
-            Auth.Services.IAuthenticationService authenticationService,
-            IAuthenticationSchemeProvider authenticationSchemeProvider)
+        public LoginController(IIdentityServerInteractionService interaction, Auth.Services.IAuthenticationService authenticationService, IAccountService accountService)
         {
             _authenticationService = authenticationService;
-
             _interaction = interaction;
-            _events = events;
-            _account = new AccountService(interaction, httpContextAccessor, clientStore, authenticationSchemeProvider);
+            _accountService = accountService;
         }
 
         /// <summary>
@@ -39,7 +29,7 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
         [HttpGet]
         public async Task<IActionResult> Login(string returnUrl)
         {
-            var vm = await _account.BuildLoginViewModelAsync(returnUrl);
+            var vm = await _accountService.BuildLoginViewModelAsync(returnUrl);
 
             return View(vm);
         }
@@ -58,14 +48,14 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
                     var error = await _authenticationService.Authenticate(authRequest);
                     if (error != null)
                     {
-                        var tryAgainView = await _account.BuildLoginViewModelAsync(authRequest);
+                        var tryAgainView = await _accountService.BuildLoginViewModelAsync(authRequest);
                         tryAgainView.Error = error;
                         return View(tryAgainView);
                     }
                 }
                 catch(Exception)
                 {
-                    var tryAgainView = await _account.BuildLoginViewModelAsync(authRequest);
+                    var tryAgainView = await _accountService.BuildLoginViewModelAsync(authRequest);
                     return View(tryAgainView);
                 }
 
@@ -78,7 +68,7 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
             }
 
             // something went wrong, show form with error
-            var vm = await _account.BuildLoginViewModelAsync(authRequest);
+            var vm = await _accountService.BuildLoginViewModelAsync(authRequest);
             return View(vm);
         }
     }

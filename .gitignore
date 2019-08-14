@@ -259,4 +259,8 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-/src/Voidwell.Auth/testsettings.json
+testsettings.json
+devsettings.json
+*.bat
+*.sh
+*.rsa

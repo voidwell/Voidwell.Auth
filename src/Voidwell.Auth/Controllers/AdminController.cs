@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
-using Voidwell.VoidwellAuth.Client;
+using Voidwell.Auth.Stores;
 
 namespace Voidwell.Auth.Controllers
 {

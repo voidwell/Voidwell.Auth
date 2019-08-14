@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Voidwell.Auth
+namespace Voidwell.Auth.Stores
 {
     public interface IVoidwellClientStore: IClientStore
     {
