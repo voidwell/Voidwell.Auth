@@ -11,7 +11,8 @@ namespace Voidwell.Auth.Stores
         Task<IEnumerable<Client>> GetAllClientsAsync();
         Task<Client> CreateClientAsync(Client client);
         Task<Client> UpdateClientAsync(string clientId, Client client);
+        Task DeleteClientAsync(string clientId);
         Task<Guid> CreateSecretAsync(string clientId, string description, DateTime? expiration = null);
-        Task DeleteSecretAsync(string clientId, string description);
+        Task DeleteSecretAsync(string clientId, int secretIndex);
     }
 }

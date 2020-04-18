@@ -66,49 +66,59 @@ namespace Voidwell.Auth.Stores
             return savedModel;
         }
 
-        public async Task<Guid> CreateSecretAsync(string clientId, string description, DateTime? expiration = null)
+        public async Task DeleteClientAsync(string clientId)
         {
-            var client = await FindClientByIdAsync(clientId);
-            if (client == null)
+            var existing = await _context.Clients.FindAsync(clientId);
+            if (existing == null)
             {
-                throw new Exception();
+                return;
             }
 
-            if (client.ClientSecrets.Any(a => a.Description == description))
+            _context.Clients.Remove(existing);
+            await Context.SaveChangesAsync();
+        }
+
+        public async Task<Guid> CreateSecretAsync(string clientId, string description, DateTime? expiration = null)
+        {
+            var client = await _context.Clients.FirstOrDefaultAsync(a => a.ClientId == clientId);
+            if (client == null)
             {
                 throw new Exception();
             }
 
             var secretValue = Guid.NewGuid();
-            var secret = new Secret(secretValue.ToString(), description, expiration);
 
-            client.ClientSecrets.Add(secret);
+            var model = client.ToModel();
+            model.ClientSecrets.Add(new Secret(secretValue.ToString().Sha256(), description, expiration));
 
-            var entity = client.ToEntity();
-            _context.Clients.Update(entity);
+            client.ClientSecrets = model.ToEntity().ClientSecrets;
+
+            _context.Clients.Update(client);
             await _context.SaveChangesAsync();
 
             return secretValue;
         }
 
-        public async Task DeleteSecretAsync(string clientId, string description)
+        public async Task DeleteSecretAsync(string clientId, int secretIndex)
         {
-            var client = await FindClientByIdAsync(clientId);
+            var client = await _context.Clients.FirstOrDefaultAsync(a => a.ClientId == clientId);
             if (client == null)
             {
                 throw new Exception();
             }
 
-            var secret = client.ClientSecrets.FirstOrDefault(a => a.Description == description);
+            var model = client.ToModel();
+            var secret = model.ClientSecrets.ElementAt(secretIndex);
             if (secret == default(Secret))
             {
                 throw new Exception();
             }
 
-            client.ClientSecrets.Remove(secret);
+            model.ClientSecrets.Remove(secret);
 
-            var entity = client.ToEntity();
-            _context.Clients.Update(entity);
+            client.ClientSecrets = model.ToEntity().ClientSecrets;
+
+            _context.Clients.Update(client);
             await _context.SaveChangesAsync();
         }
     }

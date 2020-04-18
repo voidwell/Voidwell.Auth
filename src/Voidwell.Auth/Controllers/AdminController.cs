@@ -1,6 +1,7 @@
 ﻿using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
@@ -27,7 +28,7 @@ namespace Voidwell.Auth.Controllers
         {
             var clients = await _clientStore.GetAllClientsAsync();
 
-            clients.ToList().ForEach(a => a.ClientSecrets?.Clear());
+            clients.ToList().ForEach(a => SanitizeSecrets(a.ClientSecrets));
 
             return Ok(clients);
         }
@@ -41,7 +42,7 @@ namespace Voidwell.Auth.Controllers
                 return NotFound();
             }
 
-            client.ClientSecrets.Clear();
+            SanitizeSecrets(client.ClientSecrets);
 
             return Ok(client);
         }
@@ -69,6 +70,8 @@ namespace Voidwell.Auth.Controllers
 
             var storeClient = await _clientStore.UpdateClientAsync(clientId, client);
 
+            SanitizeSecrets(storeClient.ClientSecrets);
+
             return Ok(storeClient);
         }
 
@@ -85,15 +88,18 @@ namespace Voidwell.Auth.Controllers
             return Created($"client/{clientId}/secret", secret);
         }
 
-        [HttpDelete("client/{clientId}/secret")]
-        public async Task<ActionResult> DeleteClientSecret(string clientId, [FromQuery]SecretRequest request)
+        [HttpDelete("client/{clientId}/secret/{secretIndex}")]
+        public async Task<ActionResult> DeleteClientSecret(string clientId, int secretIndex)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            await _clientStore.DeleteSecretAsync(clientId, secretIndex);
 
-            await _clientStore.DeleteSecretAsync(clientId, request.Description);
+            return NoContent();
+        }
+
+        [HttpDelete("client/{clientId}")]
+        public async Task<ActionResult> DeleteClient(string clientId)
+        {
+            await _clientStore.DeleteClientAsync(clientId);
 
             return NoContent();
         }
@@ -103,7 +109,7 @@ namespace Voidwell.Auth.Controllers
         {
             var apiResources = await _resourceStore.GetAllApiResourcesAsync();
 
-            apiResources.ToList().ForEach(a => a.ApiSecrets?.Clear());
+            apiResources.ToList().ForEach(a => SanitizeSecrets(a.ApiSecrets));
 
             return Ok(apiResources);
         }
@@ -117,7 +123,7 @@ namespace Voidwell.Auth.Controllers
                 return NotFound();
             }
 
-            apiResource.ApiSecrets.Clear();
+            SanitizeSecrets(apiResource.ApiSecrets);
 
             return Ok(apiResource);
         }
@@ -145,7 +151,17 @@ namespace Voidwell.Auth.Controllers
 
             var storeApiResource = await _resourceStore.UpdateApiResourceAsync(apiResourceId, apiResource);
 
+            SanitizeSecrets(storeApiResource.ApiSecrets);
+
             return Ok(storeApiResource);
+        }
+
+        [HttpDelete("resource/{apiResourceId}")]
+        public async Task<ActionResult> DeleteApiResource(string apiResourceId)
+        {
+            await _resourceStore.DeleteApiResourceAsync(apiResourceId);
+
+            return NoContent();
         }
 
         [HttpPost("resource/{apiResourceId}/secret")]
@@ -161,17 +177,17 @@ namespace Voidwell.Auth.Controllers
             return Created($"resource/{apiResourceId}/secret", secret);
         }
 
-        [HttpDelete("resource/{apiResourceId}/secret")]
-        public async Task<ActionResult> DeleteApiResourceSecret(string apiResourceId, [FromQuery]SecretRequest request)
+        [HttpDelete("resource/{apiResourceId}/secret/{secretIndex}")]
+        public async Task<ActionResult> DeleteApiResourceSecret(string apiResourceId, int secretIndex)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            await _resourceStore.DeleteSecretAsync(apiResourceId, request.Description);
+            await _resourceStore.DeleteSecretAsync(apiResourceId, secretIndex);
 
             return NoContent();
+        }
+
+        private void SanitizeSecrets(ICollection<Secret> secrets)
+        {
+            secrets?.ToList().ForEach(s => s.Value = null);
         }
     }
 }

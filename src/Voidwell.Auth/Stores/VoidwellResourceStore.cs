@@ -63,49 +63,59 @@ namespace Voidwell.Auth.Stores
             return savedModel;
         }
 
-        public async Task<Guid> CreateSecretAsync(string apiResourceId, string description, DateTime? expiration = null)
+        public async Task DeleteApiResourceAsync(string apiResourceId)
         {
-            var apiResource = await FindApiResourceAsync(apiResourceId);
-            if (apiResource == null)
+            var existing = await _context.ApiResources.FindAsync(apiResourceId);
+            if (existing == null)
             {
-                throw new Exception();
+                return;
             }
 
-            if (apiResource.ApiSecrets.Any(a => a.Description == description))
+            _context.ApiResources.Remove(existing);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Guid> CreateSecretAsync(string apiResourceId, string description, DateTime? expiration = null)
+        {
+            var resource = await _context.ApiResources.FirstOrDefaultAsync(a => a.Name == apiResourceId);
+            if (resource == null)
             {
                 throw new Exception();
             }
 
             var secretValue = Guid.NewGuid();
-            var secret = new Secret(secretValue.ToString(), description, expiration);
 
-            apiResource.ApiSecrets.Add(secret);
+            var model = resource.ToModel();
+            model.ApiSecrets.Add(new Secret(secretValue.ToString().Sha256(), description, expiration));
 
-            var entity = apiResource.ToEntity();
-            _context.ApiResources.Update(entity);
+            resource.Secrets = model.ToEntity().Secrets;
+
+            _context.ApiResources.Update(resource);
             await _context.SaveChangesAsync();
 
             return secretValue;
         }
 
-        public async Task DeleteSecretAsync(string apiResourceId, string description)
+        public async Task DeleteSecretAsync(string apiResourceId, int secretIndex)
         {
-            var apiResource = await FindApiResourceAsync(apiResourceId);
-            if (apiResource == null)
+            var resource = await _context.ApiResources.FirstOrDefaultAsync(a => a.Name == apiResourceId);
+            if (resource == null)
             {
                 throw new Exception();
             }
 
-            var secret = apiResource.ApiSecrets.FirstOrDefault(a => a.Description == description);
+            var model = resource.ToModel();
+            var secret = model.ApiSecrets.ElementAt(secretIndex);
             if (secret == default(Secret))
             {
                 throw new Exception();
             }
 
-            apiResource.ApiSecrets.Remove(secret);
+            model.ApiSecrets.Remove(secret);
 
-            var entity = apiResource.ToEntity();
-            _context.ApiResources.Update(entity);
+            resource.Secrets = model.ToEntity().Secrets;
+
+            _context.ApiResources.Update(resource);
             await _context.SaveChangesAsync();
         }
     }

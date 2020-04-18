@@ -11,7 +11,8 @@ namespace Voidwell.Auth.Stores
         Task<IEnumerable<ApiResource>> GetAllApiResourcesAsync();
         Task<ApiResource> CreateApiResourceAsync(ApiResource apiResource);
         Task<ApiResource> UpdateApiResourceAsync(string apiResourceId, ApiResource apiResource);
+        Task DeleteApiResourceAsync(string apiResourceId);
         Task<Guid> CreateSecretAsync(string apiResourceId, string description, DateTime? expiration = null);
-        Task DeleteSecretAsync(string apiResourceId, string description);
+        Task DeleteSecretAsync(string apiResourceId, int secretIndex);
     }
 }
