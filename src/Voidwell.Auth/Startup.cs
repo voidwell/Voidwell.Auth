@@ -11,11 +11,12 @@ using Microsoft.AspNetCore.Http;
 using Voidwell.Auth.Delegation;
 using Voidwell.Auth.Clients;
 using System.IdentityModel.Tokens.Jwt;
-using Voidwell.Auth.Stores;
+//using Voidwell.Auth.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using IdentityModel;
 using Voidwell.Logging;
+using Voidwell.Auth.Admin;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -56,6 +57,9 @@ namespace Voidwell.VoidwellAuth.Client
                                         .RequireClaim(JwtClaimTypes.Scope, "voidwell-auth-admin"));
                 });
                 //.AddCors();
+
+            services.AddAdminServices();
+
             services.AddMvc();
 
 
@@ -83,8 +87,8 @@ namespace Voidwell.VoidwellAuth.Client
             services.AddTransient<ICorsPolicyService, CorsPolicyService>();
             services.AddTransient<IProfileService, ProfileService>();
             services.AddTransient<Auth.Services.IAuthenticationService, Auth.Services.AuthenticationService>();
-            services.AddTransient<IVoidwellClientStore, VoidwellClientStore>();
-            services.AddTransient<IVoidwellResourceStore, VoidwellResourceStore>();
+            //services.AddTransient<IVoidwellClientStore, VoidwellClientStore>();
+            //services.AddTransient<IVoidwellResourceStore, VoidwellResourceStore>();
             services.AddSingleton<IUserManagementClient, UserManagementClient>();
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<Auth.Services.IConsentService, ConsentService>();
@@ -140,8 +144,7 @@ namespace Voidwell.VoidwellAuth.Client
 
             app.UseLoggingMiddleware();
 
-            app.InitializeDatabases();
-            app.SeedData();
+            app.InitializeDatabases(Configuration);
 
             app.UseForwardedHeaders(GetForwardedHeaderOptions());
 
