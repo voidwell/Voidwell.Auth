@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Auth", "src\Voidwell.Auth\Voidwell.Auth.csproj", "{3CB8DA74-429F-4896-958E-B45B3F7FDB37}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8E0D1024-C46A-4F10-8766-55E58B65C8A8} = {8E0D1024-C46A-4F10-8766-55E58B65C8A8}
+		{6C13132E-BEA3-4C67-8098-EEE18A1924EA} = {6C13132E-BEA3-4C67-8098-EEE18A1924EA}
+		{2DBF0E70-B848-47B3-91A7-67177CCC9034} = {2DBF0E70-B848-47B3-91A7-67177CCC9034}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}"
 EndProject
@@ -15,7 +20,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dockerfile.debug = Dockerfile.debug
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Common", "src\Voidwell.Common\Voidwell.Common.csproj", "{8573F301-D7B1-4F05-9228-B096FF2E7F8C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.Data", "src\Voidwell.Auth.Data\Voidwell.Auth.Data.csproj", "{2DBF0E70-B848-47B3-91A7-67177CCC9034}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Common", "src\Voidwell.Common\Voidwell.Common.csproj", "{8E0D1024-C46A-4F10-8766-55E58B65C8A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.Admin", "src\Voidwell.Auth.Admin\Voidwell.Auth.Admin.csproj", "{6C13132E-BEA3-4C67-8098-EEE18A1924EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,17 +36,27 @@ Global
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8573F301-D7B1-4F05-9228-B096FF2E7F8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DBF0E70-B848-47B3-91A7-67177CCC9034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DBF0E70-B848-47B3-91A7-67177CCC9034}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DBF0E70-B848-47B3-91A7-67177CCC9034}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DBF0E70-B848-47B3-91A7-67177CCC9034}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E0D1024-C46A-4F10-8766-55E58B65C8A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E0D1024-C46A-4F10-8766-55E58B65C8A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E0D1024-C46A-4F10-8766-55E58B65C8A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E0D1024-C46A-4F10-8766-55E58B65C8A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C13132E-BEA3-4C67-8098-EEE18A1924EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C13132E-BEA3-4C67-8098-EEE18A1924EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C13132E-BEA3-4C67-8098-EEE18A1924EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C13132E-BEA3-4C67-8098-EEE18A1924EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3CB8DA74-429F-4896-958E-B45B3F7FDB37} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
-		{8573F301-D7B1-4F05-9228-B096FF2E7F8C} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
+		{2DBF0E70-B848-47B3-91A7-67177CCC9034} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
+		{8E0D1024-C46A-4F10-8766-55E58B65C8A8} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
+		{6C13132E-BEA3-4C67-8098-EEE18A1924EA} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8356B9-449C-421F-8C67-CAE7445379AC}
