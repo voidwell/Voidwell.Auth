@@ -26,6 +26,7 @@ namespace Voidwell.Auth.Data.Repositories
                 .Include(x => x.UserClaims)
                 .Include(x => x.Properties)
                 .Include(x => x.Scopes)
+                    .ThenInclude(x => x.UserClaims)
                 .Where(x => x.Id == apiResourceId)
                 .AsNoTracking()
                 .SingleOrDefaultAsync();
@@ -123,6 +124,16 @@ namespace Voidwell.Auth.Data.Repositories
             _dbContext.ApiResources.Remove(apiResource);
 
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetApiResourceScopeConflictsAsync(int apiResourceId, params string[] scopeNames)
+        {
+            var conflictScopes = await _dbContext.ApiScopes
+                .Where(x => scopeNames.Contains(x.Name) && x.ApiResourceId != apiResourceId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return conflictScopes.Select(a => a.Name);
         }
 
         private async Task RemoveApiResourceRelationsAsync(int apiResourceId)

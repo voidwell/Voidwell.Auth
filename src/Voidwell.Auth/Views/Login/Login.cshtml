@@ -8,7 +8,7 @@
             </svg>
         </div>
         <div class="validation-text">
-            @Html.Partial("_ValidationSummary")
+            @await Html.PartialAsync("_ValidationSummary")
             <div class="server-error">@(ViewData.Model.Error)</div>
         </div>
         <form asp-route="Login" class="login-form">
