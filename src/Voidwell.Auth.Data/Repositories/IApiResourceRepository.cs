@@ -18,5 +18,6 @@ namespace Voidwell.Auth.Data.Repositories
         Task<ApiResource> AddApiResourceAsync(ApiResource apiResource);
         Task<ApiResource> UpdateApiResourceAsync(int apiResourceId, ApiResource apiResource);
         Task RemoveApiResourceAsync(int apiResourceId);
+        Task<IEnumerable<string>> GetApiResourceScopeConflictsAsync(int apiResourceId, params string[] scopeName);
     }
 }

@@ -56,6 +56,14 @@ namespace Voidwell.Auth.Admin.Services
         public async Task<ApiResourceApiDto> UpdateApiResourceAsync(string name, ApiResourceApiDto apiResource)
         {
             var id = await GetIdByApiResourceIdAsync(name);
+
+            var scopeNames = apiResource.Scopes.Select(x => x.Name).ToArray();
+            var scopeConflicts = await _repository.GetApiResourceScopeConflictsAsync(id, scopeNames);
+            if (scopeConflicts.Any())
+            {
+                throw new ConflictException($"A scope with this name already exists: '{string.Join(", ", scopeConflicts)}'");
+            }
+
             var updatedApiResource = await _repository.UpdateApiResourceAsync(id, apiResource.ToEntity());
             return updatedApiResource.ToModel();
         }
