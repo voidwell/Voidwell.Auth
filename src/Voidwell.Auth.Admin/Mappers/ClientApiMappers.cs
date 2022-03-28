@@ -19,9 +19,9 @@ namespace Voidwell.Auth.Admin.Mappers
             return Mapper.Map<ClientApiDto>(client);
         }
 
-        public static ClientSecretApiDto ToModel(this ClientSecret clientSecret)
+        public static SecretApiDto ToModel(this ClientSecret clientSecret)
         {
-            return Mapper.Map<ClientSecretApiDto>(clientSecret);
+            return Mapper.Map<SecretApiDto>(clientSecret);
         }
 
         public static Client ToEntity(this ClientApiDto client)

@@ -34,7 +34,7 @@ namespace Voidwell.Auth.Admin.Services
             return new PagedList<ClientApiDto>(clients.Data.Select(c => c.ToModel()), clients.PageNumber, clients.PageSize, clients.TotalCount);
         }
 
-        public async Task<IEnumerable<ClientSecretApiDto>> GetClientSecretsAsync(string clientId)
+        public async Task<IEnumerable<SecretApiDto>> GetClientSecretsAsync(string clientId)
         {
             var id = await GetIdByClientIdAsync(clientId);
             var secrets = await _repository.GetClientSecretsAsync(id);
@@ -66,7 +66,7 @@ namespace Voidwell.Auth.Admin.Services
             await _repository.RemoveClientAsync(id);
         }
 
-        public async Task<ClientSecretApiDto> CreateClientSecretAsync(string clientId, SecretRequest request)
+        public async Task<CreatedSecretResponse> CreateClientSecretAsync(string clientId, SecretRequest request)
         {
             var id = await GetIdByClientIdAsync(clientId);
 
@@ -84,7 +84,7 @@ namespace Voidwell.Auth.Admin.Services
 
             var createdSecret = await _repository.AddClientSecretAsync(id, secret);
 
-            return createdSecret.ToModel();
+            return new CreatedSecretResponse(secretValue, createdSecret.ToModel());
         }
 
         public async Task DeleteClientSecretAsync(string clientId, int secretId)

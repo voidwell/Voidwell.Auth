@@ -33,7 +33,7 @@ namespace Voidwell.Auth.Admin.Mappers
                 .ReverseMap()
                 .ForMember(dest => dest.Scope, opt => opt.MapFrom(src => src));
 
-            CreateMap<ClientSecret, ClientSecretApiDto>(MemberList.Destination)
+            CreateMap<ClientSecret, SecretApiDto>(MemberList.Destination)
                 .ForMember(dest => dest.Type, opt => opt.Condition(srs => srs != null))
                 .ReverseMap();
 
@@ -55,7 +55,7 @@ namespace Voidwell.Auth.Admin.Mappers
                 .ReverseMap();
 
             // model to entity
-            CreateMap<ClientSecretApiDto, ClientSecret>(MemberList.Source)
+            CreateMap<SecretApiDto, ClientSecret>(MemberList.Source)
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id));
 
             CreateMap<ClientClaimApiDto, ClientClaim>(MemberList.Source)

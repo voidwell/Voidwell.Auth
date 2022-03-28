@@ -67,7 +67,7 @@ namespace Voidwell.Auth.Admin.Controllers
         }
 
         [HttpGet("{name}/secret")]
-        public async Task<ActionResult<IEnumerable<ApiSecretApiDto>>> GetApiResourceSecrets(string name)
+        public async Task<ActionResult<IEnumerable<SecretApiDto>>> GetApiResourceSecrets(string name)
         {
             var secrets = await _apiResourceService.GetApiResourceSecretsAsync(name);
 
@@ -75,7 +75,7 @@ namespace Voidwell.Auth.Admin.Controllers
         }
 
         [HttpPost("{name}/secret")]
-        public async Task<ActionResult<ApiSecretApiDto>> CreateApiResourceSecret(string name, [FromBody]SecretRequest request)
+        public async Task<ActionResult<CreatedSecretResponse>> CreateApiResourceSecret(string name, [FromBody]SecretRequest request)
         {
             if (!ModelState.IsValid)
             {

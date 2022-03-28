@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Voidwell.Auth.Admin.Models
 {
-    public class ApiSecretApiDto
+    public class SecretApiDto
     {
         [Required]
         public string Type { get; set; } = "SharedSecret";

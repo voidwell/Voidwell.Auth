@@ -16,7 +16,7 @@ namespace Voidwell.Auth.Admin.Mappers
             CreateMap<ApiScope, ApiScopeApiDto>(MemberList.Destination)
                 .ForMember(x => x.UserClaims, opt => opt.MapFrom(src => src.UserClaims.Select(x => x.Type)));
 
-            CreateMap<ApiSecret, ApiSecretApiDto>(MemberList.Destination)
+            CreateMap<ApiSecret, SecretApiDto>(MemberList.Destination)
                 .ForMember(dest => dest.Type, opt => opt.Condition(srs => srs != null));
 
             CreateMap<ApiResourceProperty, ApiResourcePropertyApiDto>(MemberList.Destination)

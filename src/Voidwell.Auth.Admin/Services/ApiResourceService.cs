@@ -34,7 +34,7 @@ namespace Voidwell.Auth.Admin.Services
             return new PagedList<ApiResourceApiDto>(apiResources.Data.Select(c => c.ToModel()), apiResources.PageNumber, apiResources.PageSize, apiResources.TotalCount);
         }
 
-        public async Task<IEnumerable<ApiSecretApiDto>> GetApiResourceSecretsAsync(string name)
+        public async Task<IEnumerable<SecretApiDto>> GetApiResourceSecretsAsync(string name)
         {
             var id = await GetIdByApiResourceIdAsync(name);
             var secrets = await _repository.GetApiResourceSecretsAsync(id);
@@ -74,7 +74,7 @@ namespace Voidwell.Auth.Admin.Services
             await _repository.RemoveApiResourceAsync(id);
         }
 
-        public async Task<ApiSecretApiDto> CreateApiResourceSecretAsync(string name, SecretRequest request)
+        public async Task<CreatedSecretResponse> CreateApiResourceSecretAsync(string name, SecretRequest request)
         {
             var id = await GetIdByApiResourceIdAsync(name);
 
@@ -92,7 +92,7 @@ namespace Voidwell.Auth.Admin.Services
 
             var createdSecret = await _repository.AddApiResourceSecretAsync(id, secret);
 
-            return createdSecret.ToModel();
+            return new CreatedSecretResponse(secretValue, createdSecret.ToModel());
         }
 
         public async Task DeleteApiResourceSecretAsync(string name, int secretId)

@@ -19,9 +19,9 @@ namespace Voidwell.Auth.Admin.Mappers
             return resource == null ? null : Mapper.Map<ApiResourceApiDto>(resource);
         }
 
-        public static ApiSecretApiDto ToModel(this ApiSecret apiSecret)
+        public static SecretApiDto ToModel(this ApiSecret apiSecret)
         {
-            return Mapper.Map<ApiSecretApiDto>(apiSecret);
+            return Mapper.Map<SecretApiDto>(apiSecret);
         }
 
         public static ApiResource ToEntity(this ApiResourceApiDto resource)

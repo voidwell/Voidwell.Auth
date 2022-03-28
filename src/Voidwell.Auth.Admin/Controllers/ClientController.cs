@@ -67,7 +67,7 @@ namespace Voidwell.Auth.Admin.Controllers
         }
 
         [HttpGet("{clientId}/secret")]
-        public async Task<ActionResult<IEnumerable<ClientSecretApiDto>>> GetClientSecrets(string clientId)
+        public async Task<ActionResult<IEnumerable<SecretApiDto>>> GetClientSecrets(string clientId)
         {
             var secrets = await _clientService.GetClientSecretsAsync(clientId);
 
@@ -75,7 +75,7 @@ namespace Voidwell.Auth.Admin.Controllers
         }
 
         [HttpPost("{clientId}/secret")]
-        public async Task<ActionResult<ClientSecretApiDto>> CreateClientSecret(string clientId, [FromBody]SecretRequest request)
+        public async Task<ActionResult<CreatedSecretResponse>> CreateClientSecret(string clientId, [FromBody]SecretRequest request)
         {
             if (!ModelState.IsValid)
             {
