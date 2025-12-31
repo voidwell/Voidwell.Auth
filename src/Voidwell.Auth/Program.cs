@@ -21,9 +21,6 @@ using Voidwell.Auth.Delegation;
 using Voidwell.Auth.Services;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement;
-using AuthenticationService = Voidwell.Auth.Services.AuthenticationService;
-using IAuthenticationService = Voidwell.Auth.Services.Abstractions.IAuthenticationService;
-using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -76,7 +73,7 @@ builder.Services.AddAuthentication("voidwell")
         })
         .AddJwtBearer("Bearer", options =>
         {
-            options.Authority = "http://voidwellauth:5000";
+            options.Authority = "https://auth.voidwell.com";
             options.Audience = "voidwell-auth";
             options.RequireHttpsMetadata = false;
             options.SaveToken = true;
@@ -98,6 +95,7 @@ builder.Services.AddIdentityServer(options =>
     })
     .AddDeveloperSigningCredential()
     .AddIdentityServerStores(builder.Configuration)
+    .AddAspNetIdentityStores(builder.Configuration)
     .AddProfileService<ProfileService>()
     .AddExtensionGrantValidator<DelegationGrantValidator>();
 
@@ -122,9 +120,9 @@ builder.Services
     .AddTransient<IDelegationGrantValidationService, DelegationGrantValidationService>()
     .AddTransient<ICorsPolicyService, CorsPolicyService>()
     .AddTransient<IProfileService, ProfileService>()
-    .AddTransient<IAuthenticationService, AuthenticationService>()
+    .AddTransient<ICredentialSignOnService, CredentialSignOnService>()
     .AddTransient<IAccountService, AccountService>()
-    .AddTransient<IConsentService, ConsentService>();
+    .AddTransient<IConsentHandler, ConsentHandler>();
 
 // Build
 var app = builder.Build();

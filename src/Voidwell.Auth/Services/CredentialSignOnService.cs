@@ -13,17 +13,16 @@ using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Exceptions;
 using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
-using IAuthenticationService = Voidwell.Auth.Services.Abstractions.IAuthenticationService;
 
 namespace Voidwell.Auth.Services
 {
-    public class AuthenticationService : IAuthenticationService
+    public class CredentialSignOnService : ICredentialSignOnService
     {
         private readonly IUserAuthenticationService _userAuthenticationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
 
-        public AuthenticationService(IUserAuthenticationService userAuthenticationService, IHttpContextAccessor httpContextAccessor, ILogger<AuthenticationService> logger)
+        public CredentialSignOnService(IUserAuthenticationService userAuthenticationService, IHttpContextAccessor httpContextAccessor, ILogger<CredentialSignOnService> logger)
         {
             _userAuthenticationService = userAuthenticationService;
             _httpContextAccessor = httpContextAccessor;

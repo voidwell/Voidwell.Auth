@@ -3,7 +3,7 @@ using Voidwell.Auth.UserManagement.Models;
 
 namespace Voidwell.Auth.Services.Abstractions
 {
-    public interface IAuthenticationService
+    public interface ICredentialSignOnService
     {
         Task<string> Authenticate(AuthenticationRequest authRequest);
     }

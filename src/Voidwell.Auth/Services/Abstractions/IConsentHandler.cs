@@ -4,7 +4,7 @@ using Voidwell.Auth.Models;
 
 namespace Voidwell.Auth.Services.Abstractions
 {
-    public interface IConsentService
+    public interface IConsentHandler
     {
         Task<ProcessConsentResult> ProcessConsent(ConsentInputModel model);
 

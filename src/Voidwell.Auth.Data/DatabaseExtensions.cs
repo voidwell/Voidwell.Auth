@@ -63,16 +63,18 @@ public static class DatabaseExtensions
         return idsvBuilder;
     }
 
-    public static void AddAspNetIdentity(this IServiceCollection services, IConfiguration configuration)
+    public static IIdentityServerBuilder AddAspNetIdentityStores(this IIdentityServerBuilder builder, IConfiguration configuration)
     {
         var dbOptions = configuration.Get<DatabaseOptions>();
 
         // change database in connection string to the usermanagement database
 
-        services.AddDbContext<UserDbContext>(builder =>
+        builder.Services.AddDbContext<UserDbContext>(builder =>
                 builder.UseNpgsql(dbOptions.UserDBConnectionString, b => b.MigrationsAssembly(_migrationAssembly)));
 
-        services.AddScoped(sp => new Func<UserDbContext>(() => sp.GetRequiredService<UserDbContext>()));
+        builder.Services.AddScoped(sp => new Func<UserDbContext>(() => sp.GetRequiredService<UserDbContext>()));
+
+        return builder;
     }
 
     public static IApplicationBuilder InitializeDatabases(this IApplicationBuilder app, IConfiguration configuration)

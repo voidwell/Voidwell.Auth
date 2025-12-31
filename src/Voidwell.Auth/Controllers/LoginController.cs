@@ -14,11 +14,11 @@ public class LoginController : Controller
 {
     private readonly IIdentityServerInteractionService _interaction;
     private readonly IAccountService _accountService;
-    private readonly IAuthenticationService _authenticationService;
+    private readonly ICredentialSignOnService _credentialSignOnService;
 
-    public LoginController(IIdentityServerInteractionService interaction, IAuthenticationService authenticationService, IAccountService accountService)
+    public LoginController(IIdentityServerInteractionService interaction, ICredentialSignOnService credentialSignOnService, IAccountService accountService)
     {
-        _authenticationService = authenticationService;
+        _credentialSignOnService = credentialSignOnService;
         _interaction = interaction;
         _accountService = accountService;
     }
@@ -45,7 +45,8 @@ public class LoginController : Controller
         {
             try
             {
-                var error = await _authenticationService.Authenticate(authRequest);
+
+                var error = await _credentialSignOnService.Authenticate(authRequest);
                 if (error != null)
                 {
                     var tryAgainView = await _accountService.BuildLoginViewModelAsync(authRequest);
