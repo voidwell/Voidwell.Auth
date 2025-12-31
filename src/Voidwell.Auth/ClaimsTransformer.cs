@@ -5,17 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Voidwell.Auth.Clients;
+using Voidwell.Auth.UserManagement.Services.Abstractions;
 
 namespace Voidwell.VoidwellAuth.Client
 {
     public class ClaimsTransformer : IClaimsTransformation
     {
-        private readonly IUserManagementClient _userManagementClient;
+        private readonly IUserService _userService;
 
-        public ClaimsTransformer(IUserManagementClient userManagementClient)
+        public ClaimsTransformer(IUserService userService)
         {
-            _userManagementClient = userManagementClient;
+            _userService = userService;
         }
 
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
@@ -26,7 +26,8 @@ namespace Voidwell.VoidwellAuth.Client
                 try
                 {
                     var sub = principal.FindFirstValue(JwtClaimTypes.Subject);
-                    roles = await _userManagementClient.GetRoles(sub);
+                    roles = await _userService.GetRoles(Guid.Parse(sub))
+                        ?? Array.Empty<string>();
                 }
                 catch (Exception)
                 {

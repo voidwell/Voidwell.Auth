@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace Voidwell.Auth.Admin.Models
+namespace Voidwell.Auth.Admin.Models;
+
+public class SecretRequest
 {
-    public class SecretRequest
-    {
-        public string Description { get; set; }
-        public DateTime? Expiration { get; set; }
-    }
+    public string Description { get; set; }
+    public DateTime? Expiration { get; set; }
 }

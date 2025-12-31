@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="IdentityModel" />
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Voidwell.Auth.Data\Voidwell.Auth.Data.csproj" />
+    </ItemGroup>
+
+</Project>

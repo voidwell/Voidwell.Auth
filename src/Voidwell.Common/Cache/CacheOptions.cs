@@ -1,7 +1,6 @@
-﻿namespace Voidwell.Common.Cache
+﻿namespace Voidwell.Common.Cache;
+
+public class CacheOptions
 {
-    public class CacheOptions
-    {
-        public string RedisConfiguration { get; set; }
-    }
+    public string RedisConfiguration { get; set; }
 }

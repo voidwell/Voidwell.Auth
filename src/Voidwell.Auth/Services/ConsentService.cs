@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
+using Voidwell.Auth.Services.Abstractions;
+using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 
 namespace Voidwell.Auth.Services
 {

@@ -1,7 +1,6 @@
-﻿namespace Voidwell.Common.Configuration
+﻿namespace Voidwell.Common.Configuration;
+
+public class ServiceProperties
 {
-    public class ServiceProperties
-    {
-        public string Name { get; set; }
-    }
+    public string Name { get; set; }
 }

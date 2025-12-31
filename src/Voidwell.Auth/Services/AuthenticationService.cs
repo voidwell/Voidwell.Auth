@@ -1,42 +1,59 @@
-﻿using IdentityModel;
-using IdentityServer4;
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Voidwell.Auth.Clients;
-using Voidwell.Auth.Models;
+using IdentityModel;
+using IdentityServer4;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+using Voidwell.Auth.Models;
+using Voidwell.Auth.Services.Abstractions;
+using Voidwell.Auth.UserManagement.Exceptions;
+using Voidwell.Auth.UserManagement.Models;
+using Voidwell.Auth.UserManagement.Services.Abstractions;
+using IAuthenticationService = Voidwell.Auth.Services.Abstractions.IAuthenticationService;
 
 namespace Voidwell.Auth.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IUserManagementClient _userManagementClient;
+        private readonly IUserAuthenticationService _userAuthenticationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
 
-        public AuthenticationService(IUserManagementClient userManagementClient, IHttpContextAccessor httpContextAccessor, ILogger<AuthenticationService> logger)
+        public AuthenticationService(IUserAuthenticationService userAuthenticationService, IHttpContextAccessor httpContextAccessor, ILogger<AuthenticationService> logger)
         {
-            _userManagementClient = userManagementClient;
+            _userAuthenticationService = userAuthenticationService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
         public async Task<string> Authenticate(AuthenticationRequest authRequest)
         {
-            var authResult = await _userManagementClient.Authenticate(authRequest);
-            if (authResult == null)
-                return null;
-
-            _logger.LogDebug($"Got authentication result for user {authResult?.UserId.ToString()}");
-
-            if (authResult.Error != null)
+            AuthenticationResult authResult;
+            try
             {
-                return authResult.Error;
+                authResult = await _userAuthenticationService.Authenticate(authRequest);
+                if (authResult == null)
+                {
+                    return null;
+                }
+
+                _logger.LogDebug("Got authentication result for user {UserId}", authResult?.UserId.ToString());
+            }
+            catch (UserNotFoundException)
+            {
+                return "User with that username does not exist.";
+            }
+            catch (InvalidPasswordException)
+            {
+                return "The password entered is incorrect.";
+            }
+            catch (UserLockedOutException)
+            {
+                return "Account has been locked. Please try again later.";
             }
 
             var name = authResult.Claims.FirstOrDefault(a => a.Type == JwtClaimTypes.Name)?.Value;
@@ -46,7 +63,7 @@ namespace Voidwell.Auth.Services
                 DisplayName = name,
                 AuthenticationTime = DateTime.UtcNow,
                 AdditionalClaims = authResult.Claims.Where(AdditionalClaimFilter).ToArray(),
-                IdentityProvider = "auth.localdev.com"
+                IdentityProvider = "auth.voidwell.com"
             };
             var principal = user.CreatePrincipal();
 

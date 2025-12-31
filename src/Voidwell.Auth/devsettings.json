@@ -1,3 +1,4 @@
 ﻿{
-  "DBConnectionString": "Server=192.168.2.100;Database=voidwell.auth;Username=localdev;Password=localdev;Keepalive=1"
+  "AuthDBConnectionString": "Server=192.168.2.100;Database=voidwell.auth;Username=localdev;Password=localdev;Keepalive=1",
+  "UserDBConnectionString": "Server=192.168.2.100;Database=voidwell.usermanagement;Username=localdev;Password=localdev;Keepalive=1"
 }

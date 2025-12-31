@@ -1,16 +1,15 @@
 ﻿using System;
 
-namespace Voidwell.Auth.Admin.Exceptions
-{
-    public class NotFoundException : Exception
-    {
-        public NotFoundException()
-        {
-        }
+namespace Voidwell.Auth.Admin.Exceptions;
 
-        public NotFoundException(string message)
-            : base(message)
-        {
-        }
+public class NotFoundException : Exception
+{
+    public NotFoundException()
+    {
+    }
+
+    public NotFoundException(string message)
+        : base(message)
+    {
     }
 }

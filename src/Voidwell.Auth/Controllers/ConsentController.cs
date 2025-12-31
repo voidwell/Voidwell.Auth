@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
-using Voidwell.Auth.Services;
+using Voidwell.Auth.Services.Abstractions;
 
 namespace Voidwell.Auth.Controllers
 {

@@ -1,28 +1,30 @@
-﻿using IdentityServer4.Services;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
-using IdentityServer4.Models;
-using IdentityServer4.Extensions;
 using IdentityModel;
+using IdentityServer4.Extensions;
+using IdentityServer4.Models;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Voidwell.Auth.Clients;
-using System.IO;
-using System.Text;
+using Voidwell.Auth.UserManagement.Services.Abstractions;
 
 namespace Voidwell.Auth.Services
 {
     public class ProfileService : IProfileService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IUserManagementClient _userManagementClient;
+        private readonly IUserService _userService;
         private readonly ILogger<ProfileService> _logger;
 
-        public ProfileService(IHttpContextAccessor httpContextAccessor, IUserManagementClient userManagementClient, ILogger<ProfileService> logger)
+        public ProfileService(IHttpContextAccessor httpContextAccessor, IUserService userService, ILogger<ProfileService> logger)
         {
             _httpContextAccessor = httpContextAccessor;
-            _userManagementClient = userManagementClient;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -30,11 +32,11 @@ namespace Voidwell.Auth.Services
         {
             if (Guid.TryParse(context.Subject?.GetSubjectId(), out Guid userId))
             {
-                var claims = (await _userManagementClient.GetProfileClaimsAsync(userId)).ToList();
+                var claims = await GetProfileClaimsAsync(userId);
 
-                _logger.LogInformation("Claims: {0}", string.Join(", ", claims.Select(a => $"{a.Type}:{a.Value}")));
+                _logger.LogInformation("Claims: {Claims}", string.Join(", ", claims.Select(a => $"{a.Type}:{a.Value}")));
 
-                _logger.LogInformation(89415, "Requested claims: {0}", string.Join(", ", context.RequestedClaimTypes));
+                _logger.LogInformation(89415, "Requested claims: {Claims}", string.Join(", ", context.RequestedClaimTypes));
 
                 context.AddRequestedClaims(claims);
             }
@@ -44,35 +46,43 @@ namespace Voidwell.Auth.Services
             }
         }
 
-        public Task IsActiveAsync(IsActiveContext context)
+        public async Task IsActiveAsync(IsActiveContext context)
         {
             context.IsActive = false;
 
             if (!Guid.TryParse(context.Subject.GetSubjectId(), out Guid userId))
             {
                 _logger.LogInformation("no user");
-                return Task.CompletedTask;
+                return;
             }
 
-            /*
             if (context.Subject.FindFirst(JwtClaimTypes.SessionId)?.Value == null)
             {
                 _logger.LogInformation("no session");
                 return;
             }
-            
-            var markActivity = false;
-            var requestPath = _httpContextAccessor.HttpContext.Request.Path.ToString();
-            if (requestPath == "/connect/introspect" ||
-                requestPath == "/connect/token" ||
-                requestPath == "/connect/authorize/login")
-            {
-                markActivity = true;
-            }
-            */
 
             context.IsActive = true;
-            return Task.CompletedTask;
+        }
+
+        private async Task<List<Claim>> GetProfileClaimsAsync(Guid userId)
+        {
+            var user = await _userService.GetUser(userId);
+            var roles = await _userService.GetRoles(userId);
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtClaimTypes.Subject, userId.ToString()),
+                new Claim(JwtClaimTypes.Name, user.UserName),
+                new Claim(JwtClaimTypes.Email, user.Email)
+            };
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(JwtClaimTypes.Role, role));
+            }
+
+            return claims;
         }
     }
 }

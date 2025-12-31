@@ -6,101 +6,100 @@ using Voidwell.Auth.Admin.Models;
 using Voidwell.Auth.Admin.Services;
 using Voidwell.Auth.Data.Models;
 
-namespace Voidwell.Auth.Admin.Controllers
+namespace Voidwell.Auth.Admin.Controllers;
+
+[Route("admin/resource")]
+[SecurityHeaders]
+[Authorize("IsAdmin")]
+public class ApiResourceController : Controller
 {
-    [Route("admin/resource")]
-    [SecurityHeaders]
-    [Authorize("IsAdmin")]
-    public class ApiResourceController : Controller
+    private readonly IApiResourceService _apiResourceService;
+
+    public ApiResourceController(IApiResourceService apiResourceService)
     {
-        private readonly IApiResourceService _apiResourceService;
+        _apiResourceService = apiResourceService;
+    }
 
-        public ApiResourceController(IApiResourceService apiResourceService)
+    [HttpGet]
+    public async Task<ActionResult<PagedList<ApiResourceApiDto>>> GetAllApiResources([FromQuery]string search = "", [FromQuery]int page = 1)
+    {
+        var apiResources = await _apiResourceService.GetApiResourcesAsync(search, page);
+
+        return Ok(apiResources);
+    }
+
+    [HttpGet("{name}")]
+    public async Task<ActionResult<ApiResourceApiDto>> GetApiResourceById(string name)
+    {
+        var apiResource = await _apiResourceService.GetApiResourceAsync(name);
+        if (apiResource == null)
         {
-            _apiResourceService = apiResourceService;
+            return NotFound();
         }
 
-        [HttpGet]
-        public async Task<ActionResult<PagedList<ApiResourceApiDto>>> GetAllApiResources([FromQuery]string search = "", [FromQuery]int page = 1)
-        {
-            var apiResources = await _apiResourceService.GetApiResourcesAsync(search, page);
+        return Ok(apiResource);
+    }
 
-            return Ok(apiResources);
+    [HttpPost]
+    public async Task<ActionResult<ApiResourceApiDto>> CreateApiResource([FromBody]ApiResourceApiDto apiResource)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
         }
 
-        [HttpGet("{name}")]
-        public async Task<ActionResult<ApiResourceApiDto>> GetApiResourceById(string name)
-        {
-            var apiResource = await _apiResourceService.GetApiResourceAsync(name);
-            if (apiResource == null)
-            {
-                return NotFound();
-            }
+        var createdApiResourceDto = await _apiResourceService.CreateApiResourceAsync(apiResource);
 
-            return Ok(apiResource);
+        return Created("resource", createdApiResourceDto);
+    }
+
+    [HttpPut("{name}")]
+    public async Task<ActionResult<ApiResourceApiDto>> UpdateApiResource(string name, [FromBody]ApiResourceApiDto apiResourceDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ApiResourceApiDto>> CreateApiResource([FromBody]ApiResourceApiDto apiResource)
+        var updatedApiResourceDto = await _apiResourceService.UpdateApiResourceAsync(name, apiResourceDto);
+
+        return Ok(updatedApiResourceDto);
+    }
+
+    [HttpGet("{name}/secret")]
+    public async Task<ActionResult<IEnumerable<SecretApiDto>>> GetApiResourceSecrets(string name)
+    {
+        var secrets = await _apiResourceService.GetApiResourceSecretsAsync(name);
+
+        return Ok(secrets);
+    }
+
+    [HttpPost("{name}/secret")]
+    public async Task<ActionResult<CreatedSecretResponse>> CreateApiResourceSecret(string name, [FromBody]SecretRequest request)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var createdApiResourceDto = await _apiResourceService.CreateApiResourceAsync(apiResource);
-
-            return Created("resource", createdApiResourceDto);
+            return BadRequest(ModelState);
         }
 
-        [HttpPut("{name}")]
-        public async Task<ActionResult<ApiResourceApiDto>> UpdateApiResource(string name, [FromBody]ApiResourceApiDto apiResourceDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        var secret = await _apiResourceService.CreateApiResourceSecretAsync(name, request);
 
-            var updatedApiResourceDto = await _apiResourceService.UpdateApiResourceAsync(name, apiResourceDto);
+        return Created($"resource/{name}/secret", secret);
+    }
 
-            return Ok(updatedApiResourceDto);
-        }
+    [HttpDelete("{name}/secret/{secretId}")]
+    public async Task<ActionResult> DeleteApiResourceSecret(string name, int secretId)
+    {
+        await _apiResourceService.DeleteApiResourceSecretAsync(name, secretId);
 
-        [HttpGet("{name}/secret")]
-        public async Task<ActionResult<IEnumerable<SecretApiDto>>> GetApiResourceSecrets(string name)
-        {
-            var secrets = await _apiResourceService.GetApiResourceSecretsAsync(name);
+        return NoContent();
+    }
 
-            return Ok(secrets);
-        }
+    [HttpDelete("{name}")]
+    public async Task<ActionResult> DeleteApiResource(string name)
+    {
+        await _apiResourceService.RemoveApiResourceAsync(name);
 
-        [HttpPost("{name}/secret")]
-        public async Task<ActionResult<CreatedSecretResponse>> CreateApiResourceSecret(string name, [FromBody]SecretRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var secret = await _apiResourceService.CreateApiResourceSecretAsync(name, request);
-
-            return Created($"resource/{name}/secret", secret);
-        }
-
-        [HttpDelete("{name}/secret/{secretId}")]
-        public async Task<ActionResult> DeleteApiResourceSecret(string name, int secretId)
-        {
-            await _apiResourceService.DeleteApiResourceSecretAsync(name, secretId);
-
-            return NoContent();
-        }
-
-        [HttpDelete("{name}")]
-        public async Task<ActionResult> DeleteApiResource(string name)
-        {
-            await _apiResourceService.RemoveApiResourceAsync(name);
-
-            return NoContent();
-        }
+        return NoContent();
     }
 }

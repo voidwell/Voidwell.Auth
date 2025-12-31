@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Voidwell.Common.Cache
+namespace Voidwell.Common.Cache;
+
+public interface ICache
 {
-    public interface ICache
-    {
-        Task SetAsync(string key, object value, TimeSpan? expires = null);
-        Task<T> GetAsync<T>(string key);
-        Task RemoveAsync(string key);
-    }
+    Task SetAsync(string key, object value, TimeSpan expires);
+    Task<T> GetAsync<T>(string key);
+    Task RemoveAsync(string key);
 }

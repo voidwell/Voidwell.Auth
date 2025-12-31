@@ -1,80 +1,51 @@
 ﻿using System;
-using StackExchange.Redis;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Voidwell.Common.Configuration;
+using ZiggyCreatures.Caching.Fusion;
 
-namespace Voidwell.Common.Cache
+namespace Voidwell.Common.Cache;
+
+public class CacheWrapper : ICache
 {
-    public class CacheWrapper : ICache, IDisposable
+    private readonly IFusionCache _cache;
+
+    public CacheWrapper(IFusionCache cache)
     {
-        private CacheOptions _options;
-        private ConnectionMultiplexer _redis;
-        private IDatabase _db;
+        _cache = cache;
+    }
 
-        private readonly string _keyPrefix;
-
-        public CacheWrapper(CacheOptions options, ServiceProperties serviceProperties)
+    public async Task SetAsync(string key, object value, TimeSpan expires)
+    {
+        try
         {
-            _options = options;
-            _keyPrefix = serviceProperties?.Name;
-
-            Task.Run(() => Connect());
+            await _cache.SetAsync(key, value, expires);
         }
-
-        public Task SetAsync(string key, object value, TimeSpan? expires = null)
+        catch (Exception)
         {
-            try
-            {
-                var sValue = JsonConvert.SerializeObject(value);
-                return _db.StringSetAsync(KeyFormatter(key), sValue, expiry: expires);
-            }
-            catch (Exception)
-            {
-                return Task.CompletedTask;
-            }
+            return;
         }
+    }
 
-        public async Task<T> GetAsync<T>(string key)
+    public async Task<T> GetAsync<T>(string key)
+    {
+        try
         {
-            try
-            {
-                var value = await _db.StringGetAsync(KeyFormatter(key));
-
-                return JsonConvert.DeserializeObject<T>(value);
-            }
-            catch (Exception)
-            {
-                return default(T);
-            }
+            return await _cache.GetOrDefaultAsync<T>(key);
         }
-
-        public Task RemoveAsync(string key)
+        catch (Exception)
         {
-            try
-            {
-                return _db.KeyDeleteAsync(KeyFormatter(key));
-            }
-            catch (Exception)
-            {
-                return Task.CompletedTask;
-            }
+            return default;
         }
+    }
 
-        private async Task Connect()
+    public async Task RemoveAsync(string key)
+    {
+        try
         {
-            _redis = await ConnectionMultiplexer.ConnectAsync(_options.RedisConfiguration);
-            _db = _redis.GetDatabase();
+            await _cache.RemoveAsync(key);
         }
-
-        private string KeyFormatter(string key)
+        catch (Exception)
         {
-            return $"{_keyPrefix}_{key}";
-        }
-
-        public void Dispose()
-        {
-            _redis.Dispose();
+            return;
         }
     }
 }

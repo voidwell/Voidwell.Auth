@@ -1,28 +1,30 @@
-FROM microsoft/dotnet:2.2-sdk AS build-env
+# --- Build (restore + publish) ---
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
-# Copy and restore as distinct layers
 COPY *.sln ./
+COPY Directory.Build.props ./
+COPY Directory.Packages.props ./
+
 COPY ./src/Voidwell.Auth/*.csproj ./src/Voidwell.Auth/
 COPY ./src/Voidwell.Auth.Data/*.csproj ./src/Voidwell.Auth.Data/
 COPY ./src/Voidwell.Auth.Admin/*.csproj ./src/Voidwell.Auth.Admin/
 COPY ./src/Voidwell.Common/*.csproj ./src/Voidwell.Common/
 
-RUN dotnet restore
+RUN --mount=type=cache,target=/root/.nuget/packages dotnet restore --nologo
 
-# Copy everything else and build
-COPY . ./
-RUN dotnet publish -c Release -o /app/out
+COPY . .
 
-# Build runtime image
-FROM microsoft/dotnet:2.2-aspnetcore-runtime
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet publish -c Release -o /app/publish --no-restore ./src/Voidwell.Auth/Voidwell.Auth.csproj
 
-# Copy the app
+# --- Runtime ---
+FROM mcr.microsoft.com/dotnet/runtime:10.0
 WORKDIR /app
-COPY --from=build-env /app/out .
+
+COPY --from=build /app/publish ./
 
 ENV ASPNETCORE_URLS http://*:5000
 EXPOSE 5000
 
-# Start the app
-ENTRYPOINT dotnet Voidwell.Auth.dll
+ENTRYPOINT ["dotnet", "Voidwell.Auth.dll"]

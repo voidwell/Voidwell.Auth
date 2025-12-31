@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Voidwell.Auth.UserManagement.Models;
 
 namespace Voidwell.Auth.Models
 {

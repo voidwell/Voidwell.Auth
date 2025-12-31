@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
 using System;
+using Voidwell.Auth.Services.Abstractions;
+using Voidwell.Auth.UserManagement.Models;
 
 namespace Voidwell.Auth.Services
 {

@@ -2,40 +2,39 @@
 using IdentityServer4.EntityFramework.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Voidwell.Auth.Data
+namespace Voidwell.Auth.Data;
+
+public interface IIdentityServerConfigurationDbContext : IConfigurationDbContext
 {
-    public interface IIdentityServerConfigurationDbContext : IConfigurationDbContext
-    {
-        DbSet<ApiSecret> ApiSecrets { get; set; }
+    DbSet<ApiSecret> ApiSecrets { get; set; }
 
-        DbSet<ApiScope> ApiScopes { get; set; }
+    DbSet<ApiScope> ApiScopes { get; set; }
 
-        DbSet<ApiScopeClaim> ApiScopeClaims { get; set; }
+    DbSet<ApiScopeClaim> ApiScopeClaims { get; set; }
 
-        DbSet<IdentityClaim> IdentityClaims { get; set; }
+    DbSet<IdentityClaim> IdentityClaims { get; set; }
 
-        DbSet<ApiResourceClaim> ApiResourceClaims { get; set; }
+    DbSet<ApiResourceClaim> ApiResourceClaims { get; set; }
 
-        DbSet<ClientGrantType> ClientGrantTypes { get; set; }
+    DbSet<ClientGrantType> ClientGrantTypes { get; set; }
 
-        DbSet<ClientScope> ClientScopes { get; set; }
+    DbSet<ClientScope> ClientScopes { get; set; }
 
-        DbSet<ClientSecret> ClientSecrets { get; set; }
+    DbSet<ClientSecret> ClientSecrets { get; set; }
 
-        DbSet<ClientPostLogoutRedirectUri> ClientPostLogoutRedirectUris { get; set; }
+    DbSet<ClientPostLogoutRedirectUri> ClientPostLogoutRedirectUris { get; set; }
 
-        DbSet<ClientCorsOrigin> ClientCorsOrigins { get; set; }
+    DbSet<ClientCorsOrigin> ClientCorsOrigins { get; set; }
 
-        DbSet<ClientIdPRestriction> ClientIdPRestrictions { get; set; }
+    DbSet<ClientIdPRestriction> ClientIdPRestrictions { get; set; }
 
-        DbSet<ClientRedirectUri> ClientRedirectUris { get; set; }
+    DbSet<ClientRedirectUri> ClientRedirectUris { get; set; }
 
-        DbSet<ClientClaim> ClientClaims { get; set; }
+    DbSet<ClientClaim> ClientClaims { get; set; }
 
-        DbSet<ClientProperty> ClientProperties { get; set; }
+    DbSet<ClientProperty> ClientProperties { get; set; }
 
-        DbSet<IdentityResourceProperty> IdentityResourceProperties { get; set; }
+    DbSet<IdentityResourceProperty> IdentityResourceProperties { get; set; }
 
-        DbSet<ApiResourceProperty> ApiResourceProperties { get; set; }
-    }
+    DbSet<ApiResourceProperty> ApiResourceProperties { get; set; }
 }

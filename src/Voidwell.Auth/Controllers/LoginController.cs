@@ -4,7 +4,8 @@ using System;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
 using Voidwell.Auth;
-using Voidwell.Auth.Services;
+using Voidwell.Auth.Services.Abstractions;
+using Voidwell.Auth.UserManagement.Models;
 
 namespace Voidwell.VoidwellAuth.Client.Controllers
 {
@@ -14,9 +15,9 @@ namespace Voidwell.VoidwellAuth.Client.Controllers
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IAccountService _accountService;
-        private readonly Auth.Services.IAuthenticationService _authenticationService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public LoginController(IIdentityServerInteractionService interaction, Auth.Services.IAuthenticationService authenticationService, IAccountService accountService)
+        public LoginController(IIdentityServerInteractionService interaction, IAuthenticationService authenticationService, IAccountService accountService)
         {
             _authenticationService = authenticationService;
             _interaction = interaction;

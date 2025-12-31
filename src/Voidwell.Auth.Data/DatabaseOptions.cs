@@ -1,7 +1,7 @@
-﻿namespace Voidwell.Auth.Data
+﻿namespace Voidwell.Auth.Data;
+
+public class DatabaseOptions
 {
-    public class DatabaseOptions
-    {
-        public string DBConnectionString { get; set; }
-    }
+    public string AuthDBConnectionString { get; set; }
+    public string UserDBConnectionString { get; set; }
 }

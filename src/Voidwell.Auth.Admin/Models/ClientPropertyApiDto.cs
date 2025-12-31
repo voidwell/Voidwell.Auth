@@ -1,9 +1,8 @@
-﻿namespace Voidwell.Auth.Admin.Models
+﻿namespace Voidwell.Auth.Admin.Models;
+
+public class ClientPropertyApiDto
 {
-    public class ClientPropertyApiDto
-    {
-        public int Id { get; set; }
-        public string Key { get; set; }
-        public string Value { get; set; }
-    }
+    public int Id { get; set; }
+    public string Key { get; set; }
+    public string Value { get; set; }
 }

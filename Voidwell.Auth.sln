@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29123.88
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Auth", "src\Voidwell.Auth\Voidwell.Auth.csproj", "{3CB8DA74-429F-4896-958E-B45B3F7FDB37}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -15,9 +15,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BAF62441-142F-4DCF-9047-17E25F4F302E}"
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
 		Dockerfile = Dockerfile
-		Dockerfile.debug = Dockerfile.debug
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.Data", "src\Voidwell.Auth.Data\Voidwell.Auth.Data.csproj", "{2DBF0E70-B848-47B3-91A7-67177CCC9034}"
@@ -25,6 +27,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voidwell.Common", "src\Voidwell.Common\Voidwell.Common.csproj", "{8E0D1024-C46A-4F10-8766-55E58B65C8A8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.Admin", "src\Voidwell.Auth.Admin\Voidwell.Auth.Admin.csproj", "{6C13132E-BEA3-4C67-8098-EEE18A1924EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.UserManagement", "src\Voidwell.Auth.UserManagement\Voidwell.Auth.UserManagement.csproj", "{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +52,10 @@ Global
 		{6C13132E-BEA3-4C67-8098-EEE18A1924EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C13132E-BEA3-4C67-8098-EEE18A1924EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C13132E-BEA3-4C67-8098-EEE18A1924EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,6 +65,7 @@ Global
 		{2DBF0E70-B848-47B3-91A7-67177CCC9034} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{8E0D1024-C46A-4F10-8766-55E58B65C8A8} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{6C13132E-BEA3-4C67-8098-EEE18A1924EA} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
+		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8356B9-449C-421F-8C67-CAE7445379AC}

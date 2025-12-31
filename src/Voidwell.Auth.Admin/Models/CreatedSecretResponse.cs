@@ -1,14 +1,13 @@
-﻿namespace Voidwell.Auth.Admin.Models
-{
-    public class CreatedSecretResponse
-    {
-        public CreatedSecretResponse(string value, SecretApiDto dto)
-        {
-            Value = value;
-            Model = dto;
-        }
+﻿namespace Voidwell.Auth.Admin.Models;
 
-        public string Value { get; set; }
-        public SecretApiDto Model { get; set; }
+public class CreatedSecretResponse
+{
+    public CreatedSecretResponse(string value, SecretApiDto dto)
+    {
+        Value = value;
+        Model = dto;
     }
+
+    public string Value { get; set; }
+    public SecretApiDto Model { get; set; }
 }

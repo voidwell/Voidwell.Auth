@@ -6,25 +6,26 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Auth.Clients;
 using Voidwell.Auth.Models;
 using Voidwell.Auth.Services;
+using Voidwell.Auth.UserManagement.Models;
+using Voidwell.Auth.UserManagement.Services.Abstractions;
 
 namespace Voidwell.Auth
 {
     public class ResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IUserManagementClient _userManagementClient;
+        private readonly IUserAuthenticationService _userAuthenticationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<ResourceOwnerPasswordValidator> _logger;
 
         public ResourceOwnerPasswordValidator(SignInManager<ApplicationUser> signInManager,
-            IUserManagementClient userManagementClient, IHttpContextAccessor httpContextAccessor,
+            IUserAuthenticationService userAuthenticationService, IHttpContextAccessor httpContextAccessor,
             ILogger<ResourceOwnerPasswordValidator> logger)
         {
             _signInManager = signInManager;
-            _userManagementClient = userManagementClient;
+            _userAuthenticationService = userAuthenticationService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
@@ -53,7 +54,7 @@ namespace Voidwell.Auth
                 IpAddress = httpContext.Connection.RemoteIpAddress?.ToString()
             };
 
-            await _userManagementClient.Authenticate(authRequest);
+            await _userAuthenticationService.Authenticate(authRequest);
 
             var claims = httpContext.User.Claims;
             var userId = claims.SingleOrDefault(c => c.Type == JwtClaimTypes.Subject)?.Value;

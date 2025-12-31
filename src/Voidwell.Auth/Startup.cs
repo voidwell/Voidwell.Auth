@@ -9,14 +9,14 @@ using Newtonsoft.Json;
 using System;
 using Microsoft.AspNetCore.Http;
 using Voidwell.Auth.Delegation;
-using Voidwell.Auth.Clients;
 using System.IdentityModel.Tokens.Jwt;
-//using Voidwell.Auth.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using IdentityModel;
 using Voidwell.Logging;
 using Voidwell.Auth.Admin;
+using Voidwell.Auth.UserManagement;
+using Voidwell.Auth.Services.Abstractions;
 
 namespace Voidwell.VoidwellAuth.Client
 {
@@ -76,7 +76,6 @@ namespace Voidwell.VoidwellAuth.Client
 
             services.AddEntityFrameworkContext(Configuration);
 
-            services.AddAuthenticatedHttpClient();
             services.AddSingleton<IClaimsTransformation, ClaimsTransformer>();
 
             services.AddTransient<Func<ITokenCreationService>>(a => () => a.GetService<ITokenCreationService>());
@@ -86,12 +85,9 @@ namespace Voidwell.VoidwellAuth.Client
 
             services.AddTransient<ICorsPolicyService, CorsPolicyService>();
             services.AddTransient<IProfileService, ProfileService>();
-            services.AddTransient<Auth.Services.IAuthenticationService, Auth.Services.AuthenticationService>();
-            //services.AddTransient<IVoidwellClientStore, VoidwellClientStore>();
-            //services.AddTransient<IVoidwellResourceStore, VoidwellResourceStore>();
-            services.AddSingleton<IUserManagementClient, UserManagementClient>();
+            services.AddTransient<Auth.Services.Abstractions.IAuthenticationService, Auth.Services.AuthenticationService>();
             services.AddTransient<IAccountService, AccountService>();
-            services.AddTransient<Auth.Services.IConsentService, ConsentService>();
+            services.AddTransient<Auth.Services.Abstractions.IConsentService, ConsentService>();
 
             services.AddCors();
 
@@ -132,6 +128,8 @@ namespace Voidwell.VoidwellAuth.Client
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
                 });
+
+            services.AddUserManagementServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
