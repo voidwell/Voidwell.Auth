@@ -9,6 +9,7 @@ COPY Directory.Packages.props ./
 COPY ./src/Voidwell.Auth/*.csproj ./src/Voidwell.Auth/
 COPY ./src/Voidwell.Auth.Data/*.csproj ./src/Voidwell.Auth.Data/
 COPY ./src/Voidwell.Auth.Admin/*.csproj ./src/Voidwell.Auth.Admin/
+COPY ./src/Voidwell.Auth.UserManagement/*.csproj ./src/Voidwell.Auth.UserManagement/
 COPY ./src/Voidwell.Common/*.csproj ./src/Voidwell.Common/
 
 RUN --mount=type=cache,target=/root/.nuget/packages dotnet restore --nologo
