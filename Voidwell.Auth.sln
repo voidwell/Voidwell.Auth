@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.Admin", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.UserManagement", "src\Voidwell.Auth.UserManagement\Voidwell.Auth.UserManagement.csproj", "{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.IdentityServer", "src\Voidwell.Auth.IdentityServer\Voidwell.Auth.IdentityServer.csproj", "{E9C26765-C4D7-416E-B269-1C23089C3099}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9C26765-C4D7-416E-B269-1C23089C3099}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9C26765-C4D7-416E-B269-1C23089C3099}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9C26765-C4D7-416E-B269-1C23089C3099}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9C26765-C4D7-416E-B269-1C23089C3099}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +64,7 @@ Global
 		{2DBF0E70-B848-47B3-91A7-67177CCC9034} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{6C13132E-BEA3-4C67-8098-EEE18A1924EA} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 		{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
+		{E9C26765-C4D7-416E-B269-1C23089C3099} = {4F3CEED3-E4AB-4A18-9AB6-D20DDD679CBC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE8356B9-449C-421F-8C67-CAE7445379AC}

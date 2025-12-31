@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4" />
+    <PackageReference Include="IdentityServer4.AccessTokenValidation" />
+    <PackageReference Include="IdentityServer4.AspNetIdentity" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <ProjectReference Include="..\Voidwell.Auth.Data\Voidwell.Auth.Data.csproj" />
+    <ProjectReference Include="..\Voidwell.Auth.UserManagement\Voidwell.Auth.UserManagement.csproj" />
+  </ItemGroup>
+</Project>

@@ -6,17 +6,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using Voidwell.Auth.Models;
 using Voidwell.Auth.Services.Abstractions;
+using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 
 namespace Voidwell.Auth.Services
 {
-    public class ConsentHandler : IConsentHandler
+    public class ConsentService : IConsentService
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IResourceStore _resourceStore;
-        private readonly ILogger<ConsentHandler> _logger;
+        private readonly ILogger<ConsentService> _logger;
 
-        public ConsentHandler(IIdentityServerInteractionService interaction, IClientStore clientStore, IResourceStore resourceStore, ILogger<ConsentHandler> logger)
+        public ConsentService(IIdentityServerInteractionService interaction, IClientStore clientStore, IResourceStore resourceStore, ILogger<ConsentService> logger)
         {
             _interaction = interaction;
             _clientStore = clientStore;

@@ -9,9 +9,9 @@ namespace Voidwell.Auth.Controllers
     [SecurityHeaders]
     public class ConsentController : Controller
     {
-        private readonly IConsentHandler _consentService;
+        private readonly IConsentService _consentService;
 
-        public ConsentController(IConsentHandler consentService)
+        public ConsentController(IConsentService consentService)
         {
             _consentService = consentService;
         }

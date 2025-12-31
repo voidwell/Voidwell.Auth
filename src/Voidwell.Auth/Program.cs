@@ -17,10 +17,12 @@ using Microsoft.Extensions.Logging;
 using Voidwell.Auth;
 using Voidwell.Auth.Admin;
 using Voidwell.Auth.Data;
-using Voidwell.Auth.Delegation;
+using Voidwell.Auth.IdentityServer;
+using Voidwell.Auth.IdentityServer.Services;
 using Voidwell.Auth.Services;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement;
+using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -79,26 +81,6 @@ builder.Services.AddAuthentication("voidwell")
             options.SaveToken = true;
         });
 
-builder.Services.AddIdentityServer(options =>
-    {
-        options.IssuerUri = builder.Configuration.GetValue<string>("Issuer");
-
-        options.Discovery.ShowIdentityScopes = false;
-        options.Discovery.ShowApiScopes = false;
-        options.Discovery.ResponseCacheInterval = 60 * 60;
-
-        options.InputLengthRestrictions.Scope = 800;
-
-        options.Events.RaiseSuccessEvents = true;
-        options.Events.RaiseFailureEvents = true;
-        options.Events.RaiseErrorEvents = false;
-    })
-    .AddDeveloperSigningCredential()
-    .AddIdentityServerStores(builder.Configuration)
-    .AddAspNetIdentityStores(builder.Configuration)
-    .AddProfileService<ProfileService>()
-    .AddExtensionGrantValidator<DelegationGrantValidator>();
-
 builder.Services
     .AddAntiforgery(options =>
     {
@@ -111,18 +93,14 @@ builder.Services
     .AddCors()
 
     .AddEntityFrameworkContext(builder.Configuration)
+    .AddTokenServer(builder.Configuration)
     .AddAdminServices()
     .AddUserManagementServices()
 
     .AddSingleton<IClaimsTransformation, ClaimsTransformer>()
-    .AddTransient<Func<ITokenCreationService>>(a => () => a.GetService<ITokenCreationService>())
-    .AddTransient<IDelegationTokenValidationService, DelegationTokenValidationService>()
-    .AddTransient<IDelegationGrantValidationService, DelegationGrantValidationService>()
-    .AddTransient<ICorsPolicyService, CorsPolicyService>()
-    .AddTransient<IProfileService, ProfileService>()
     .AddTransient<ICredentialSignOnService, CredentialSignOnService>()
     .AddTransient<IAccountService, AccountService>()
-    .AddTransient<IConsentHandler, ConsentHandler>();
+    .AddScoped<IConsentService, ConsentService>();
 
 // Build
 var app = builder.Build();
