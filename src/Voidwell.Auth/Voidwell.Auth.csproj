@@ -33,7 +33,6 @@
     
   <ItemGroup>
     <ProjectReference Include="..\Voidwell.Auth.UserManagement\Voidwell.Auth.UserManagement.csproj" />
-    <ProjectReference Include="..\Voidwell.Common\Voidwell.Common.csproj" />
     <ProjectReference Include="..\Voidwell.Auth.Data\Voidwell.Auth.Data.csproj" />
     <ProjectReference Include="..\Voidwell.Auth.Admin\Voidwell.Auth.Admin.csproj" />
   </ItemGroup>

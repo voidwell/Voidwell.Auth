@@ -7,7 +7,7 @@ namespace Voidwell.Auth.UserManagement.Services.Abstractions;
 
 public interface ISecurityQuestionService
 {
-    IEnumerable<string> GetSecurityQuestionsList();
+    List<string> GetSecurityQuestionsList();
     Task<IEnumerable<SecurityQuestion>> GetSecurityQuestions(Guid userId);
     Task<IEnumerable<SecurityQuestion>> CreateSecurityQuestions(Guid userId, IEnumerable<SecurityQuestion> securityQuestions);
     Task RemoveSecurityQuestions(Guid userId);

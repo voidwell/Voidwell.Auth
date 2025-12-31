@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Voidwell.Auth.UserManagement.Exceptions;
 using Voidwell.Auth.Data;
 using Microsoft.AspNetCore.Identity;
-using Newtonsoft.Json.Linq;
 using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
 
@@ -35,9 +34,9 @@ public class SecurityQuestionService : ISecurityQuestionService
             .ToListAsync();
 
         if (questions == null)
+        {
             return null;
-
-        Console.WriteLine(userId.ToString(), JToken.FromObject(questions).ToString());
+        }
 
         return questions.Select(q => new SecurityQuestion { Question = q.Question, Answer = q.Answer });
     }
@@ -70,15 +69,17 @@ public class SecurityQuestionService : ISecurityQuestionService
             .ToListAsync();
 
         if (questions == null)
+        {
             return;
+        }
 
         dbContext.SecurityQuestions.RemoveRange(questions);
         await dbContext.SaveChangesAsync();
     }
 
-    public IEnumerable<string> GetSecurityQuestionsList()
+    public List<string> GetSecurityQuestionsList()
     {
-        return SecurityQuestionsList;
+        return [.. SecurityQuestionsList];
     }
 
     public void ValidateSecurityQuestions(IEnumerable<SecurityQuestion> questions)
@@ -87,9 +88,9 @@ public class SecurityQuestionService : ISecurityQuestionService
 
         foreach(var question in questions)
         {
-            if (!questions.Contains(question))
+            if (!allQuestions.Contains(question.Question))
             {
-                _logger.LogWarning($"Invalid security question \"{question}\" was used");
+                _logger.LogWarning("Invalid security question '{Question}' was used", question.Question);
                 throw new InvalidSecurityQuestionException();
             }
         }

@@ -21,7 +21,6 @@ using Voidwell.Auth.Delegation;
 using Voidwell.Auth.Services;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement;
-using Voidwell.Common.Configuration;
 using AuthenticationService = Voidwell.Auth.Services.AuthenticationService;
 using IAuthenticationService = Voidwell.Auth.Services.Abstractions.IAuthenticationService;
 using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
@@ -113,7 +112,6 @@ builder.Services
     })
     .AddCors()
 
-    .ConfigureServiceProperties("voidwell.auth")
     .AddEntityFrameworkContext(builder.Configuration)
     .AddAdminServices()
     .AddUserManagementServices()
