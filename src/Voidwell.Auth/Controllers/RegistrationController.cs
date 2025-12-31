@@ -2,14 +2,13 @@
 using System.Threading.Tasks;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Mvc;
-using Voidwell.Auth;
 using Voidwell.Auth.Models;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
 
-namespace Voidwell.VoidwellAuth.Client.Controllers;
+namespace Voidwell.Auth.Controllers;
 
 [Route("registration")]
 [SecurityHeaders]

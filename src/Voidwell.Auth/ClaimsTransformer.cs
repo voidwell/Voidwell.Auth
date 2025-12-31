@@ -7,43 +7,42 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
 
-namespace Voidwell.VoidwellAuth.Client
+namespace Voidwell.Auth;
+
+public class ClaimsTransformer : IClaimsTransformation
 {
-    public class ClaimsTransformer : IClaimsTransformation
+    private readonly IUserService _userService;
+
+    public ClaimsTransformer(IUserService userService)
     {
-        private readonly IUserService _userService;
+        _userService = userService;
+    }
 
-        public ClaimsTransformer(IUserService userService)
+    public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+    {
+        if (principal != null && principal.Identity.IsAuthenticated)
         {
-            _userService = userService;
-        }
-
-        public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
-        {
-            if (principal != null && principal.Identity.IsAuthenticated)
+            IEnumerable<string> roles;
+            try
             {
-                IEnumerable<string> roles;
-                try
-                {
-                    var sub = principal.FindFirstValue(JwtClaimTypes.Subject);
-                    roles = await _userService.GetRoles(Guid.Parse(sub))
-                        ?? Array.Empty<string>();
-                }
-                catch (Exception)
-                {
-                    return principal;
-                }
-
-                if (roles != null && roles.Any())
-                {
-                    var claims = roles.Select(role => new Claim(JwtClaimTypes.Role, role));
-
-                    var id = ((ClaimsIdentity)principal.Identity);
-                    id.AddClaims(claims);
-                }
+                var sub = principal.FindFirstValue(JwtClaimTypes.Subject);
+                roles = await _userService.GetRoles(Guid.Parse(sub))
+                    ?? Array.Empty<string>();
+            }
+            catch (Exception)
+            {
+                return principal;
             }
 
-            return principal;
+            if (roles != null && roles.Any())
+            {
+                var claims = roles.Select(role => new Claim(JwtClaimTypes.Role, role));
+
+                var id = ((ClaimsIdentity)principal.Identity);
+                id.AddClaims(claims);
+            }
         }
+
+        return principal;
     }
 }

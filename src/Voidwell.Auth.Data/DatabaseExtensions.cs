@@ -75,11 +75,11 @@ public static class DatabaseExtensions
         services.AddScoped(sp => new Func<UserDbContext>(() => sp.GetRequiredService<UserDbContext>()));
     }
 
-    public static void InitializeDatabases(this IApplicationBuilder app, IConfiguration configuration)
+    public static IApplicationBuilder InitializeDatabases(this IApplicationBuilder app, IConfiguration configuration)
     {
         if (_initialized)
         {
-            return;
+            return app;
         }
 
         lock (_initializeLock)
@@ -100,5 +100,7 @@ public static class DatabaseExtensions
 
             _initialized = true;
         }
+
+        return app;
     }
 }

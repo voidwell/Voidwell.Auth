@@ -1,50 +1,148 @@
-﻿using Microsoft.AspNetCore;
+﻿using System;
+using System.Configuration;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json.Serialization;
+using IdentityModel;
+using IdentityServer4.Services;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Voidwell.Logging;
+using Voidwell.Auth;
+using Voidwell.Auth.Admin;
+using Voidwell.Auth.Data;
+using Voidwell.Auth.Delegation;
+using Voidwell.Auth.Services;
+using Voidwell.Auth.Services.Abstractions;
+using Voidwell.Auth.UserManagement;
+using Voidwell.Common.Configuration;
+using AuthenticationService = Voidwell.Auth.Services.AuthenticationService;
+using IAuthenticationService = Voidwell.Auth.Services.Abstractions.IAuthenticationService;
+using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 
-namespace Voidwell.VoidwellAuth.Client
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+var forwardedHeaderOptions = new ForwardedHeadersOptions
 {
-    public class Program
+    RequireHeaderSymmetry = false,
+    ForwardLimit = 15,
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeaderOptions.KnownIPNetworks.Clear();
+forwardedHeaderOptions.KnownProxies.Clear();
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Configuration
+builder.Configuration
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true)
+    .AddEnvironmentVariables();
+
+// Logging
+builder.Logging
+    .ClearProviders()
+    .AddServiceLogging(builder.Environment, builder.Configuration);
+
+// Services
+builder.Services.AddMvcCore()
+    .AddJsonOptions(options =>
     {
-        public static void Main(string[] args)
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    })
+    .AddDataAnnotations()
+    .AddAuthorization(options =>
+    {
+        options.AddPolicy("IsAdmin",
+            policy => policy.AddAuthenticationSchemes("Bearer")
+                            .RequireClaim(JwtClaimTypes.Scope, "voidwell-auth-admin"));
+    });
+
+builder.Services.AddAuthentication("voidwell")
+        .AddCookie("voidwell", options =>
         {
-            BuildWebHost(args).Run();
-        }
+            options.SlidingExpiration = false;
+            options.ExpireTimeSpan = TimeSpan.FromHours(10);
+            options.Cookie = new CookieBuilder
+            {
+                Name = "voidwell",
+                SecurePolicy = CookieSecurePolicy.SameAsRequest
+            };
+        })
+        .AddJwtBearer("Bearer", options =>
+        {
+            options.Authority = "http://voidwellauth:5000";
+            options.Audience = "voidwell-auth";
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+        });
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .UseUrls("http://0.0.0.0:5000")
-                .ConfigureLogging((context, builder) =>
-                {
-                    builder.ClearProviders();
+builder.Services.AddIdentityServer(options =>
+    {
+        options.IssuerUri = builder.Configuration.GetValue<string>("Issuer");
 
-                    var useGelf = context.Configuration.GetValue("UseGelfLogging", false);
+        options.Discovery.ShowIdentityScopes = false;
+        options.Discovery.ShowApiScopes = false;
+        options.Discovery.ResponseCacheInterval = 60 * 60;
 
-                    builder.SetMinimumLevel(LogLevel.Information);
+        options.InputLengthRestrictions.Scope = 800;
 
-                    builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
-                    builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
-                    builder.AddFilter("Microsoft.EntityFrameworkCore.Update", LogLevel.None);
-                    builder.AddFilter("Microsoft.EntityframeworkCore.Database.Command", LogLevel.None);
+        options.Events.RaiseSuccessEvents = true;
+        options.Events.RaiseFailureEvents = true;
+        options.Events.RaiseErrorEvents = false;
+    })
+    .AddDeveloperSigningCredential()
+    .AddIdentityServerStores(builder.Configuration)
+    .AddProfileService<ProfileService>()
+    .AddExtensionGrantValidator<DelegationGrantValidator>();
 
-                    var o = new LoggerFilterOptions();
+builder.Services
+    .AddAntiforgery(options =>
+    {
+        options.Cookie = new CookieBuilder
+        {
+            Name = "voidwell.xsrf",
+            SecurePolicy = CookieSecurePolicy.SameAsRequest
+        };
+    })
+    .AddCors()
 
-                    if (useGelf && !context.HostingEnvironment.IsDevelopment())
-                    {
-                        builder.AddGelf(options =>
-                        {
-                            options.LogSource = "Voidwell.Auth";
-                        });
-                    }
-                    else
-                    {
-                        builder.AddConsole();
-                        builder.AddDebug();
-                    }
-                })
-                .Build();
-    }
+    .ConfigureServiceProperties("voidwell.auth")
+    .AddEntityFrameworkContext(builder.Configuration)
+    .AddAdminServices()
+    .AddUserManagementServices()
+
+    .AddSingleton<IClaimsTransformation, ClaimsTransformer>()
+    .AddTransient<Func<ITokenCreationService>>(a => () => a.GetService<ITokenCreationService>())
+    .AddTransient<IDelegationTokenValidationService, DelegationTokenValidationService>()
+    .AddTransient<IDelegationGrantValidationService, DelegationGrantValidationService>()
+    .AddTransient<ICorsPolicyService, CorsPolicyService>()
+    .AddTransient<IProfileService, ProfileService>()
+    .AddTransient<IAuthenticationService, AuthenticationService>()
+    .AddTransient<IAccountService, AccountService>()
+    .AddTransient<IConsentService, ConsentService>();
+
+// Build
+var app = builder.Build();
+
+// Middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
 }
+
+app
+    .InitializeDatabases(app.Configuration)
+    .UseForwardedHeaders(forwardedHeaderOptions)
+    .UseAuthentication()
+    .UseStaticFiles()
+    .UseIdentityServer()
+    .UseMvc();
+
+await app.RunAsync();
