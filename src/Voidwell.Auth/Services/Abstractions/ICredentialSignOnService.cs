@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Voidwell.Auth.UserManagement.Models;
 
-namespace Voidwell.Auth.Services.Abstractions
+namespace Voidwell.Auth.Services.Abstractions;
+
+public interface ICredentialSignOnService
 {
-    public interface ICredentialSignOnService
-    {
-        Task<string> Authenticate(AuthenticationRequest authRequest);
-    }
+    Task<string> Authenticate(AuthenticationRequest authRequest);
 }

@@ -1,7 +1,6 @@
-﻿namespace Voidwell.Auth.Models
+﻿namespace Voidwell.Auth.Models;
+
+public class LogoutInputModel
 {
-    public class LogoutInputModel
-    {
-        public string LogoutId { get; set; }
-    }
+    public string LogoutId { get; set; }
 }

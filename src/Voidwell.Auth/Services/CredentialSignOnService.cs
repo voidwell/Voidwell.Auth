@@ -14,71 +14,70 @@ using Voidwell.Auth.UserManagement.Exceptions;
 using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
 
-namespace Voidwell.Auth.Services
+namespace Voidwell.Auth.Services;
+
+public class CredentialSignOnService : ICredentialSignOnService
 {
-    public class CredentialSignOnService : ICredentialSignOnService
+    private readonly IUserAuthenticationService _userAuthenticationService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger _logger;
+
+    public CredentialSignOnService(IUserAuthenticationService userAuthenticationService, IHttpContextAccessor httpContextAccessor, ILogger<CredentialSignOnService> logger)
     {
-        private readonly IUserAuthenticationService _userAuthenticationService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger _logger;
+        _userAuthenticationService = userAuthenticationService;
+        _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
+    }
 
-        public CredentialSignOnService(IUserAuthenticationService userAuthenticationService, IHttpContextAccessor httpContextAccessor, ILogger<CredentialSignOnService> logger)
+    public async Task<string> Authenticate(AuthenticationRequest authRequest)
+    {
+        AuthenticationResult authResult;
+        try
         {
-            _userAuthenticationService = userAuthenticationService;
-            _httpContextAccessor = httpContextAccessor;
-            _logger = logger;
+            authResult = await _userAuthenticationService.Authenticate(authRequest);
+            if (authResult == null)
+            {
+                return null;
+            }
+
+            _logger.LogDebug("Got authentication result for user {UserId}", authResult?.UserId.ToString());
+        }
+        catch (UserNotFoundException)
+        {
+            return "User with that username does not exist.";
+        }
+        catch (InvalidPasswordException)
+        {
+            return "The password entered is incorrect.";
+        }
+        catch (UserLockedOutException)
+        {
+            return "Account has been locked. Please try again later.";
         }
 
-        public async Task<string> Authenticate(AuthenticationRequest authRequest)
+        var name = authResult.Claims.FirstOrDefault(a => a.Type == JwtClaimTypes.Name)?.Value;
+
+        var user = new IdentityServerUser(authResult.UserId.ToString())
         {
-            AuthenticationResult authResult;
-            try
-            {
-                authResult = await _userAuthenticationService.Authenticate(authRequest);
-                if (authResult == null)
-                {
-                    return null;
-                }
+            DisplayName = name,
+            AuthenticationTime = DateTime.UtcNow,
+            AdditionalClaims = authResult.Claims.Where(AdditionalClaimFilter).ToArray(),
+            IdentityProvider = "auth.voidwell.com"
+        };
+        var principal = user.CreatePrincipal();
 
-                _logger.LogDebug("Got authentication result for user {UserId}", authResult?.UserId.ToString());
-            }
-            catch (UserNotFoundException)
-            {
-                return "User with that username does not exist.";
-            }
-            catch (InvalidPasswordException)
-            {
-                return "The password entered is incorrect.";
-            }
-            catch (UserLockedOutException)
-            {
-                return "Account has been locked. Please try again later.";
-            }
-
-            var name = authResult.Claims.FirstOrDefault(a => a.Type == JwtClaimTypes.Name)?.Value;
-
-            var user = new IdentityServerUser(authResult.UserId.ToString())
-            {
-                DisplayName = name,
-                AuthenticationTime = DateTime.UtcNow,
-                AdditionalClaims = authResult.Claims.Where(AdditionalClaimFilter).ToArray(),
-                IdentityProvider = "auth.voidwell.com"
-            };
-            var principal = user.CreatePrincipal();
-
-            var authProps = new AuthenticationProperties
-            {
-                IsPersistent = true
-            };
-
-            await _httpContextAccessor.HttpContext.SignInAsync("voidwell", principal, authProps);
-            return null;
-        }
-
-        private static bool AdditionalClaimFilter(Claim claim)
+        var authProps = new AuthenticationProperties
         {
-            return claim.Type != JwtClaimTypes.Name
-                && claim.Type != JwtClaimTypes.Subject;
-        }
+            IsPersistent = true
+        };
+
+        await _httpContextAccessor.HttpContext.SignInAsync("voidwell", principal, authProps);
+        return null;
+    }
+
+    private static bool AdditionalClaimFilter(Claim claim)
+    {
+        return claim.Type != JwtClaimTypes.Name
+            && claim.Type != JwtClaimTypes.Subject;
     }
 }
