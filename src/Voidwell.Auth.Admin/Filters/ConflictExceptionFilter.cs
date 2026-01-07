@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Net;
-using Voidwell.Auth.IdentityServer.Exceptions;
+using Voidwell.Auth.IdentityProvider.Exceptions;
 
 namespace Voidwell.Auth.Admin.Filters;
 

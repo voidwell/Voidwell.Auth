@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Voidwell.Auth.Models;
 using Voidwell.Auth.Extensions;
 using Voidwell.Auth.Services.Abstractions;
-using Voidwell.Auth.IdentityServer.Services.Abstractions;
+using Voidwell.Auth.IdentityProvider.Services.Abstractions;
 
 namespace Voidwell.Auth.Controllers;
 

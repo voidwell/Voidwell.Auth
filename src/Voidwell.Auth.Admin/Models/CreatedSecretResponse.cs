@@ -1,4 +1,4 @@
-﻿using Voidwell.Auth.IdentityServer.Models;
+﻿using Voidwell.Auth.IdentityProvider.Models;
 
 namespace Voidwell.Auth.Admin.Models;
 

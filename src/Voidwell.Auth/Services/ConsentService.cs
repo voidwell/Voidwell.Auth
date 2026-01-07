@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Auth.IdentityServer.Models;
-using Voidwell.Auth.IdentityServer.Services.Abstractions;
+using Voidwell.Auth.IdentityProvider.Models;
+using Voidwell.Auth.IdentityProvider.Services.Abstractions;
 using Voidwell.Auth.Models;
 using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 

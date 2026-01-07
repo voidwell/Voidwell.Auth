@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.Admin", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.UserManagement", "src\Voidwell.Auth.UserManagement\Voidwell.Auth.UserManagement.csproj", "{720D7CD3-DF08-4AFD-8BB7-9E86E259AF77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.IdentityServer", "src\Voidwell.Auth.IdentityServer\Voidwell.Auth.IdentityServer.csproj", "{E9C26765-C4D7-416E-B269-1C23089C3099}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voidwell.Auth.IdentityProvider", "src\Voidwell.Auth.IdentityProvider\Voidwell.Auth.IdentityProvider.csproj", "{E9C26765-C4D7-416E-B269-1C23089C3099}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

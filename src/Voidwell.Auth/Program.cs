@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 using Voidwell.Auth;
 using Voidwell.Auth.Admin;
 using Voidwell.Auth.Data;
-using Voidwell.Auth.IdentityServer;
+using Voidwell.Auth.IdentityProvider;
 using Voidwell.Auth.Services;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement;

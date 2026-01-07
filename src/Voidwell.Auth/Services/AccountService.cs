@@ -7,7 +7,7 @@ using Voidwell.Auth.Models;
 using System;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Models;
-using Voidwell.Auth.IdentityServer.Services.Abstractions;
+using Voidwell.Auth.IdentityProvider.Services.Abstractions;
 
 namespace Voidwell.Auth.Services;
 

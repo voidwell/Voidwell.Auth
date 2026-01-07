@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using Voidwell.Auth.Extensions;
-using Voidwell.Auth.IdentityServer.Services.Abstractions;
+using Voidwell.Auth.IdentityProvider.Services.Abstractions;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Models;
 
