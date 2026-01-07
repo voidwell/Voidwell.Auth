@@ -41,6 +41,11 @@ public class ApiResourceRepository : IApiResourceRepository
         return apiResource?.Id;
     }
 
+    public async Task<IEnumerable<ApiResource>> GetApiResourcesAsync()
+    {
+        return await _dbContext.ApiResources.AsNoTracking().ToListAsync();
+    }
+
     public async Task<PagedList<ApiResource>> GetApiResourcesAsync(string search = "", int page = 1, int pageSize = 10)
     {
         var queryBase = string.IsNullOrEmpty(search) ? _dbContext.ApiResources : _dbContext.ApiResources.Where(a => a.Name.Contains(search, StringComparison.InvariantCultureIgnoreCase));

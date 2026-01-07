@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.Auth.Admin.Models;
+namespace Voidwell.Auth.IdentityServer.Models;
 
 public class ApiResourceApiDto
 {
     public ApiResourceApiDto()
     {
-        UserClaims = new List<string>();
-        Properties = new List<ApiResourcePropertyApiDto>();
-        Scopes = new List<ApiScopeApiDto>();
+        UserClaims = [];
+        Properties = [];
+        Scopes = [];
     }
 
     public int Id { get; set; }

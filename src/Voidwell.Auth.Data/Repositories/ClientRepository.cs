@@ -44,6 +44,11 @@ public class ClientRepository : IClientRepository
         return client?.Id;
     }
 
+    public async Task<IEnumerable<Client>> GetClientsAsync()
+    {
+        return await _dbContext.Clients.AsNoTracking().ToListAsync();
+    }
+
     public async Task<PagedList<Client>> GetClientsAsync(string search = "", int page = 1, int pageSize = 10)
     {
         var queryBase = string.IsNullOrEmpty(search)

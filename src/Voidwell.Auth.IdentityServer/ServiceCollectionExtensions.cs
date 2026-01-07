@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Voidwell.Auth.Data;
 using Voidwell.Auth.IdentityServer.Delegation;
 using Voidwell.Auth.IdentityServer.Services;
+using Voidwell.Auth.IdentityServer.Services.Abstractions;
 
 namespace Voidwell.Auth.IdentityServer;
 
@@ -33,6 +34,8 @@ public static class ServiceCollectionExtensions
             .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>();
 
         services
+            .AddScoped<IIdentityProviderManager, IdentityProviderManager>()
+            .AddScoped<IIdentityProviderInteractionService, IdentityProviderInteractionService>()
             .AddTransient<ICorsPolicyService, AuthCorsPolicyService>()
             .AddTransient<IDelegationTokenValidationService, DelegationTokenValidationService>()
             .AddTransient<IDelegationGrantValidationService, DelegationGrantValidationService>();

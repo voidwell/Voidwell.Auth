@@ -1,20 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.Auth.Admin.Models;
+namespace Voidwell.Auth.IdentityServer.Models;
 
 public class ClientApiDto
 {
     public ClientApiDto()
     {
-        AllowedScopes = new List<string>();
-        PostLogoutRedirectUris = new List<string>();
-        RedirectUris = new List<string>();
-        IdentityProviderRestrictions = new List<string>();
-        AllowedCorsOrigins = new List<string>();
-        AllowedGrantTypes = new List<string>();
-        Claims = new List<ClientClaimApiDto>();
-        Properties = new List<ClientPropertyApiDto>();
+        AllowedScopes = [];
+        PostLogoutRedirectUris = [];
+        RedirectUris = [];
+        IdentityProviderRestrictions = [];
+        AllowedCorsOrigins = [];
+        AllowedGrantTypes = [];
+        Claims = [];
+        Properties = [];
     }
 
     public int Id { get; set; }

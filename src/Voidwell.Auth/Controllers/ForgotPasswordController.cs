@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Voidwell.Auth.UserManagement.Models;
-using Voidwell.Auth.UserManagement.Services;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
 
 namespace Voidwell.Auth.Controllers;
 
-[Route("resetpassword")]
+[Route("forgotpassword")]
 [SecurityHeaders]
-public class ResetPasswordController : Controller
+public class ForgotPasswordController : Controller
 {
     private readonly ISecurityQuestionService _securityQuestionService;
     private readonly IUserService _userService;
 
-    public ResetPasswordController(ISecurityQuestionService securityQuestionService, IUserService userService)
+    public ForgotPasswordController(ISecurityQuestionService securityQuestionService, IUserService userService)
     {
         _securityQuestionService = securityQuestionService;
         _userService = userService;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Voidwell.Auth.Admin.Exceptions;
+namespace Voidwell.Auth.IdentityServer.Exceptions;
 
 public class NotFoundException : Exception
 {

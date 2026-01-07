@@ -27,7 +27,7 @@ public class ClaimsTransformer : IClaimsTransformation
             {
                 var sub = principal.FindFirstValue(JwtClaimTypes.Subject);
                 roles = await _userService.GetRoles(Guid.Parse(sub))
-                    ?? Array.Empty<string>();
+                    ?? [];
             }
             catch (Exception)
             {
@@ -38,7 +38,7 @@ public class ClaimsTransformer : IClaimsTransformation
             {
                 var claims = roles.Select(role => new Claim(JwtClaimTypes.Role, role));
 
-                var id = ((ClaimsIdentity)principal.Identity);
+                var id = (ClaimsIdentity)principal.Identity;
                 id.AddClaims(claims);
             }
         }

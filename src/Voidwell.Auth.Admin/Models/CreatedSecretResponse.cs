@@ -1,4 +1,6 @@
-﻿namespace Voidwell.Auth.Admin.Models;
+﻿using Voidwell.Auth.IdentityServer.Models;
+
+namespace Voidwell.Auth.Admin.Models;
 
 public class CreatedSecretResponse
 {

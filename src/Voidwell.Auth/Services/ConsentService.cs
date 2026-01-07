@@ -1,27 +1,25 @@
 ﻿using IdentityServer4.Models;
-using IdentityServer4.Services;
-using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Voidwell.Auth.IdentityServer.Models;
+using Voidwell.Auth.IdentityServer.Services.Abstractions;
 using Voidwell.Auth.Models;
-using Voidwell.Auth.Services.Abstractions;
 using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 
 namespace Voidwell.Auth.Services;
 
 public class ConsentService : IConsentService
 {
-    private readonly IIdentityServerInteractionService _interaction;
-    private readonly IClientStore _clientStore;
-    private readonly IResourceStore _resourceStore;
+    private readonly IIdentityProviderInteractionService _interaction;
+    private readonly IIdentityProviderManager _idpm;
     private readonly ILogger<ConsentService> _logger;
 
-    public ConsentService(IIdentityServerInteractionService interaction, IClientStore clientStore, IResourceStore resourceStore, ILogger<ConsentService> logger)
+    public ConsentService(IIdentityProviderInteractionService interaction, IIdentityProviderManager idpm, ILogger<ConsentService> logger)
     {
         _interaction = interaction;
-        _clientStore = clientStore;
-        _resourceStore = resourceStore;
+        _idpm = idpm;
         _logger = logger;
     }
 
@@ -45,7 +43,7 @@ public class ConsentService : IConsentService
                 var scopes = model.ScopesConsented;
                 if (ConsentOptions.EnableOfflineAccess == false)
                 {
-                    scopes = scopes.Where(x => x != IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess);
+                    scopes = scopes.Where(x => x != "offline_access");
                 }
 
                 grantedConsent = new ConsentResponse
@@ -68,7 +66,10 @@ public class ConsentService : IConsentService
         {
             // validate return url is still valid
             var request = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-            if (request == null) return result;
+            if (request == null)
+            {
+                return result;
+            }
 
             // communicate outcome of consent back to identityserver
             await _interaction.GrantConsentAsync(request, grantedConsent);
@@ -90,13 +91,14 @@ public class ConsentService : IConsentService
         var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
         if (request != null)
         {
-            var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
-            if (client != null)
+            var client = await _idpm.GetClientAsync(request.ClientId);
+            if (client != null && client.Enabled)
             {
-                var resources = await _resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
-                if (resources != null && (resources.IdentityResources.Any() || resources.ApiResources.Any()))
+                var identityResources = await _idpm.GetEnabledIdentityResourcesByScopeAsync(request.ScopesRequested);
+                var apiResources = await _idpm.GetEnabledApiResourcesByScopeAsync(request.ScopesRequested);
+                if (identityResources.Any() || apiResources.Any())
                 {
-                    return CreateConsentViewModel(model, returnUrl, request, client, resources);
+                    return CreateConsentViewModel(model, returnUrl, client, identityResources, apiResources);
                 }
                 else
                 {
@@ -116,35 +118,38 @@ public class ConsentService : IConsentService
         return null;
     }
 
-    private ConsentViewModel CreateConsentViewModel(
-        ConsentInputModel model, string returnUrl,
-        AuthorizationRequest request,
-        IdentityServer4.Models.Client client, Resources resources)
+    private static ConsentViewModel CreateConsentViewModel(
+        ConsentInputModel model, string returnUrl, ClientApiDto client,
+        IEnumerable<IdentityResourceDto> identityResources, IEnumerable<ApiResourceApiDto> apiResources)
     {
-        var vm = new ConsentViewModel();
-        vm.RememberConsent = model?.RememberConsent ?? true;
-        vm.ScopesConsented = model?.ScopesConsented ?? Enumerable.Empty<string>();
-
-        vm.ReturnUrl = returnUrl;
-
-        vm.ClientName = client.ClientName;
-        vm.ClientUrl = client.ClientUri;
-        vm.ClientLogoUrl = client.LogoUri;
-        vm.AllowRememberConsent = client.AllowRememberConsent;
-
-        vm.IdentityScopes = resources.IdentityResources.Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-        vm.ResourceScopes = resources.ApiResources.SelectMany(x => x.Scopes).Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-        if (ConsentOptions.EnableOfflineAccess && resources.OfflineAccess)
+        var vm = new ConsentViewModel
         {
-            vm.ResourceScopes = vm.ResourceScopes.Union(new ScopeViewModel[] {
-                GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null)
-            });
+            RememberConsent = model?.RememberConsent ?? true,
+            ScopesConsented = model?.ScopesConsented ?? [],
+
+            ReturnUrl = returnUrl,
+
+            ClientName = client.ClientName,
+            ClientUrl = client.ClientUri,
+            ClientLogoUrl = client.LogoUri,
+            AllowRememberConsent = client.AllowRememberConsent,
+        };
+
+        var offlineAccess = apiResources.All(x => x.Scopes.Any(s => s.Name == "offline_access"));
+
+        vm.IdentityScopes = identityResources.Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
+        vm.ResourceScopes = [.. apiResources.SelectMany(x => x.Scopes).Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null))];
+        if (ConsentOptions.EnableOfflineAccess && offlineAccess)
+        {
+            vm.ResourceScopes = vm.ResourceScopes.Union([
+                GetOfflineAccessScope(vm.ScopesConsented.Contains("offline_access") || model == null)
+            ]);
         }
 
         return vm;
     }
 
-    public ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+    public static ScopeViewModel CreateScopeViewModel(IdentityResourceDto identity, bool check)
     {
         return new ScopeViewModel
         {
@@ -157,7 +162,7 @@ public class ConsentService : IConsentService
         };
     }
 
-    public ScopeViewModel CreateScopeViewModel(Scope scope, bool check)
+    public static ScopeViewModel CreateScopeViewModel(ApiScopeApiDto scope, bool check)
     {
         return new ScopeViewModel
         {
@@ -174,7 +179,7 @@ public class ConsentService : IConsentService
     {
         return new ScopeViewModel
         {
-            Name = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
+            Name = "offline_access",
             DisplayName = ConsentOptions.OfflineAccessDisplayName,
             Description = ConsentOptions.OfflineAccessDescription,
             Emphasize = true,

@@ -1,6 +1,4 @@
 ﻿using IdentityModel;
-using IdentityServer4.Services;
-using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
@@ -9,25 +7,26 @@ using Voidwell.Auth.Models;
 using System;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Models;
+using Voidwell.Auth.IdentityServer.Services.Abstractions;
 
 namespace Voidwell.Auth.Services;
 
 public class AccountService : IAccountService
 {
-    private readonly IClientStore _clientStore;
+    private readonly IIdentityProviderManager _idpm;
     private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
-    private readonly IIdentityServerInteractionService _interaction;
+    private readonly IIdentityProviderInteractionService _interaction;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AccountService(
-        IIdentityServerInteractionService interaction,
+        IIdentityProviderInteractionService interaction,
         IHttpContextAccessor httpContextAccessor,
-        IClientStore clientStore,
+        IIdentityProviderManager idpm,
         IAuthenticationSchemeProvider authenticationSchemeProvider)
     {
         _interaction = interaction;
         _httpContextAccessor = httpContextAccessor;
-        _clientStore = clientStore;
+        _idpm = idpm;
         _authenticationSchemeProvider = authenticationSchemeProvider;
     }
 
@@ -59,8 +58,8 @@ public class AccountService : IAccountService
         var allowLocal = true;
         if (context?.ClientId != null)
         {
-            var client = await _clientStore.FindEnabledClientByIdAsync(context.ClientId);
-            if (client != null)
+            var client = await _idpm.GetClientAsync(context.ClientId);
+            if (client != null && client.Enabled)
             {
                 allowLocal = client.EnableLocalLogin;
 
@@ -77,7 +76,7 @@ public class AccountService : IAccountService
             EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
             ReturnUrl = returnUrl,
             Username = context?.LoginHint,
-            ExternalProviders = providers.ToArray()
+            ExternalProviders = [.. providers]
         };
 
         return model;
@@ -134,15 +133,12 @@ public class AccountService : IAccountService
         if (user != null)
         {
             var idp = user.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
-            if (idp != null && idp != IdentityServer4.IdentityServerConstants.LocalIdentityProvider)
+            if (idp != null && idp != "local")
             {
-                if (vm.LogoutId == null)
-                {
-                    // if there's no current logout context, we need to create one
-                    // this captures necessary info from the current logged in user
-                    // before we signout and redirect away to the external IdP for signout
-                    vm.LogoutId = await _interaction.CreateLogoutContextAsync();
-                }
+                // if there's no current logout context, we need to create one
+                // this captures necessary info from the current logged in user
+                // before we signout and redirect away to the external IdP for signout
+                vm.LogoutId ??= await _interaction.CreateLogoutContextAsync();
 
                 vm.ExternalAuthenticationScheme = idp;
             }

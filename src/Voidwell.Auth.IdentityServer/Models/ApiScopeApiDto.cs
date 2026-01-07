@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.Auth.Admin.Models;
+namespace Voidwell.Auth.IdentityServer.Models;
 
 public class ApiScopeApiDto
 {
     public ApiScopeApiDto()
     {
-        UserClaims = new List<string>();
+        UserClaims = [];
     }
 
     public bool ShowInDiscoveryDocument { get; set; } = true;

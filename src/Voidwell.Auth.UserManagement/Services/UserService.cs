@@ -51,6 +51,10 @@ public class UserService : IUserService
         };
 
         var result = await _userManager.CreateAsync(newUser, password);
+        if (!result.Succeeded)
+        {
+            throw new UserCreationException(result.Errors.FirstOrDefault()?.Description);
+        }
 
         await _userManager.AddToRoleAsync(newUser, UserRole.User.ToString());
 

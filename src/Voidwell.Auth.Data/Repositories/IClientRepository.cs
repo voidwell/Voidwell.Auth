@@ -10,6 +10,7 @@ public interface IClientRepository
 {
     Task<Client> GetClientAsync(int clientId);
     Task<int?> GetIdFromClientId(string clientId);
+    Task<IEnumerable<Client>> GetClientsAsync();
     Task<PagedList<Client>> GetClientsAsync(string search = "", int page = 1, int pageSize = 10);
     Task<ClientSecret> AddClientSecretAsync(int clientId, ClientSecret clientSecret);
     Task<IEnumerable<ClientSecret>> GetClientSecretsAsync(int clientId);

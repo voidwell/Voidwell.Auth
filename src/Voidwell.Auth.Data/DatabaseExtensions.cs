@@ -29,6 +29,7 @@ public static class DatabaseExtensions
 
         services.AddTransient<IClientRepository, ClientRepository>();
         services.AddTransient<IApiResourceRepository, ApiResourceRepository>();
+        services.AddTransient<IIdentityResourceRepository, IdentityResourceRepository>();
 
         return services;
     }

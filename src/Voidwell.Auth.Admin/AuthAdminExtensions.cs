@@ -17,8 +17,8 @@ public static class AuthAdminExtensions
             });
         services.AddMvcCore();
 
-        services.AddTransient<IClientService, ClientService>();
-        services.AddTransient<IApiResourceService, ApiResourceService>();
+        services.AddScoped<IClientService, ClientService>();
+        services.AddScoped<IApiResourceService, ApiResourceService>();
 
         return services;
     }

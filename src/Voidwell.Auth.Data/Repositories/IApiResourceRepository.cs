@@ -10,6 +10,7 @@ public interface IApiResourceRepository
 {
     Task<ApiResource> GetApiResourceAsync(int apiResourceId);
     Task<int?> GetIdFromApiResourceName(string name);
+    Task<IEnumerable<ApiResource>> GetApiResourcesAsync();
     Task<PagedList<ApiResource>> GetApiResourcesAsync(string search = "", int page = 1, int pageSize = 10);
     Task<ApiSecret> AddApiResourceSecretAsync(int apiResourceId, ApiSecret apiSecret);
     Task<IEnumerable<ApiSecret>> GetApiResourceSecretsAsync(int apiResourceId);

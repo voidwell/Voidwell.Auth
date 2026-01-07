@@ -1,11 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using IdentityServer4.Services;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Voidwell.Auth.Models;
-using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Models;
-using Voidwell.Auth.UserManagement.Services;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
 
 namespace Voidwell.Auth.Controllers;
@@ -29,7 +24,7 @@ public class RegistrationController : Controller
             return BadRequest(ModelState);
         }
 
-        var user = await _registrationService.RegisterNewUserAsync(registration);
+        await _registrationService.RegisterNewUserAsync(registration);
 
         return Ok();
     }

@@ -1,112 +1,84 @@
-﻿using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Voidwell.Auth.Admin.Exceptions;
-using Voidwell.Auth.Admin.Mappers;
 using Voidwell.Auth.Admin.Models;
 using Voidwell.Auth.Data.Models;
-using Voidwell.Auth.Data.Repositories;
+using Voidwell.Auth.IdentityServer.Models;
+using Voidwell.Auth.IdentityServer.Services.Abstractions;
 
 namespace Voidwell.Auth.Admin.Services;
 
 public class ClientService : IClientService
 {
-    private readonly IClientRepository _repository;
+    private const int _pageSize = 50;
 
-    public ClientService(IClientRepository repository)
+    private readonly IIdentityProviderManager _idpm;
+
+    public ClientService(IIdentityProviderManager idpm)
     {
-        _repository = repository;
+        _idpm = idpm;
     }
 
     public async Task<ClientApiDto> GetClientAsync(string clientId)
     {
-        var id = await GetIdByClientIdAsync(clientId);
-        var client = await _repository.GetClientAsync(id);
-        return client.ToModel();
+        return await _idpm.GetClientAsync(clientId);
     }
 
     public async Task<PagedList<ClientApiDto>> GetClientsAsync(string search = "", int page = 1)
     {
-        var clients = await _repository.GetClientsAsync(search, page);
-        return new PagedList<ClientApiDto>(clients.Data.Select(c => c.ToModel()), clients.PageNumber, clients.PageSize, clients.TotalCount);
+        var results = await _idpm.GetClientsAsync();
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            results = results
+                .Where(c => c.ClientId.Contains(search, StringComparison.InvariantCultureIgnoreCase) ||
+                            (c.ClientName != null && c.ClientName.Contains(search, StringComparison.InvariantCultureIgnoreCase)));
+        }
+
+        var pageList = results.Take(_pageSize).Skip(_pageSize * page);
+
+        return new PagedList<ClientApiDto>(pageList, page, _pageSize, results.Count());
     }
 
     public async Task<IEnumerable<SecretApiDto>> GetClientSecretsAsync(string clientId)
     {
-        var id = await GetIdByClientIdAsync(clientId);
-        var secrets = await _repository.GetClientSecretsAsync(id);
-        return secrets.Select(a => a.ToModel());
+        return await _idpm.GetClientSecretsAsync(clientId);
     }
 
     public async Task<ClientApiDto> CreateClientAsync(ClientApiDto client)
     {
-        var existing = await _repository.GetIdFromClientId(client.ClientId);
-        if (existing != null)
-        {
-            throw new ConflictException($"A client with id '{client.ClientId} already exists.");
-        }
-
-        var createdClient = await _repository.AddClientAsync(client.ToEntity());
-        return createdClient.ToModel();
+        return await _idpm.CreateClientAsync(client);
     }
 
     public async Task<ClientApiDto> UpdateClientAsync(string clientId, ClientApiDto client)
     {
-        var id = await GetIdByClientIdAsync(clientId);
-        var updatedClient = await _repository.UpdateClientAsync(id, client.ToEntity());
-        return updatedClient.ToModel();
+        return await _idpm.UpdateClientAsync(clientId, client);
     }
 
     public async Task RemoveClientAsync(string clientId)
     {
-        var id = await GetIdByClientIdAsync(clientId);
-        await _repository.RemoveClientAsync(id);
+        await _idpm.DeleteClientAsync(clientId);
     }
 
     public async Task<CreatedSecretResponse> CreateClientSecretAsync(string clientId, SecretRequest request)
     {
-        var id = await GetIdByClientIdAsync(clientId);
-
-        var secretValue = Guid.NewGuid().ToString();
-
-        var secret = new ClientSecret
+        var secretDto = new SecretApiDto
         {
-            Created = DateTime.UtcNow,
             Description = request.Description,
             Expiration = request.Expiration,
             Type = "SharedSecret",
-            ClientId = id,
-            Value = secretValue.Sha256()
+            Value = Guid.NewGuid().ToString(),
+            Created = DateTime.UtcNow
         };
 
-        var createdSecret = await _repository.AddClientSecretAsync(id, secret);
+        var createdSecret = await _idpm.AddClientSecretAsync(clientId, secretDto);
 
-        return new CreatedSecretResponse(secretValue, createdSecret.ToModel());
+        return new CreatedSecretResponse(secretDto.Value, createdSecret);
     }
 
     public async Task DeleteClientSecretAsync(string clientId, int secretId)
     {
-        var id = await GetIdByClientIdAsync(clientId);
-
-        var secret = await _repository.GetClientSecretAsync(id, secretId);
-        if (secret == null)
-        {
-            return;
-        }
-
-        await _repository.DeleteClientSecretAsync(id, secretId);
-    }
-
-    private async Task<int> GetIdByClientIdAsync(string clientId)
-    {
-        var id = await _repository.GetIdFromClientId(clientId);
-        if (id == null)
-        {
-            throw new NotFoundException($"Client '{clientId}' not found");
-        }
-        return id.Value;
+        await _idpm.DeleteClientSecretAsync(clientId, secretId);
     }
 }

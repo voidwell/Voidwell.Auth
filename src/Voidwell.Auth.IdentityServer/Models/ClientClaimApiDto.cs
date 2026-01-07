@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Voidwell.Auth.Admin.Models;
+namespace Voidwell.Auth.IdentityServer.Models;
 
 public class ClientClaimApiDto
 {

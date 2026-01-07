@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Voidwell.Auth.Admin.Models;
 using Voidwell.Auth.Data.Models;
+using Voidwell.Auth.IdentityServer.Models;
 
 namespace Voidwell.Auth.Admin.Services;
 

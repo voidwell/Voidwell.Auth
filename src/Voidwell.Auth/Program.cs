@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
 using IdentityModel;
-using IdentityServer4.Services;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,7 +15,6 @@ using Voidwell.Auth;
 using Voidwell.Auth.Admin;
 using Voidwell.Auth.Data;
 using Voidwell.Auth.IdentityServer;
-using Voidwell.Auth.IdentityServer.Services;
 using Voidwell.Auth.Services;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement;
@@ -62,8 +58,8 @@ builder.Services.AddMvcCore()
                             .RequireClaim(JwtClaimTypes.Scope, "voidwell-auth-admin"));
     });
 
-builder.Services.AddAuthentication("voidwell")
-        .AddCookie("voidwell", options =>
+builder.Services.AddAuthentication(AuthConstants.CookieSchemeName)
+        .AddCookie(AuthConstants.CookieSchemeName, options =>
         {
             options.SlidingExpiration = false;
             options.ExpireTimeSpan = TimeSpan.FromHours(10);
@@ -75,7 +71,7 @@ builder.Services.AddAuthentication("voidwell")
         })
         .AddJwtBearer("Bearer", options =>
         {
-            options.Authority = "https://auth.voidwell.com";
+            options.Authority = $"https://{AuthConstants.IdentityProvider}";
             options.Audience = "voidwell-auth";
             options.RequireHttpsMetadata = false;
             options.SaveToken = true;
@@ -98,8 +94,8 @@ builder.Services
     .AddUserManagementServices()
 
     .AddSingleton<IClaimsTransformation, ClaimsTransformer>()
-    .AddTransient<ICredentialSignOnService, CredentialSignOnService>()
-    .AddTransient<IAccountService, AccountService>()
+    .AddScoped<ICredentialSignOnService, CredentialSignOnService>()
+    .AddScoped<IAccountService, AccountService>()
     .AddScoped<IConsentService, ConsentService>();
 
 // Build

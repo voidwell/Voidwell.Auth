@@ -1,14 +1,12 @@
-﻿using IdentityServer4.Services;
-using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using IdentityServer4.Events;
-using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication;
-using Voidwell.Auth.Services;
 using Voidwell.Auth.Models;
+using Voidwell.Auth.Extensions;
+using Voidwell.Auth.Services.Abstractions;
+using Voidwell.Auth.IdentityServer.Services.Abstractions;
 
 namespace Voidwell.Auth.Controllers;
 
@@ -16,20 +14,15 @@ namespace Voidwell.Auth.Controllers;
 [SecurityHeaders]
 public class LogoutController : Controller
 {
-    private readonly IIdentityServerInteractionService _interaction;
-    private readonly IEventService _events;
-    private readonly AccountService _account;
+    private readonly IIdentityProviderEventService _eventService;
+    private readonly IAccountService _accountService;
 
     public LogoutController(
-        IIdentityServerInteractionService interaction,
-        IClientStore clientStore,
-        IHttpContextAccessor httpContextAccessor,
-        IEventService events,
-        IAuthenticationSchemeProvider authenticationSchemeProvider)
+        IIdentityProviderEventService eventService,
+        IAccountService accountService)
     {
-        _interaction = interaction;
-        _events = events;
-        _account = new AccountService(interaction, httpContextAccessor, clientStore, authenticationSchemeProvider);
+        _eventService = eventService;
+        _accountService = accountService;
     }
 
     /// <summary>
@@ -38,7 +31,7 @@ public class LogoutController : Controller
     [HttpGet]
     public async Task<IActionResult> Logout(string logoutId)
     {
-        var vm = await _account.BuildLogoutViewModelAsync(logoutId);
+        var vm = await _accountService.BuildLogoutViewModelAsync(logoutId);
 
         if (vm.ShowLogoutPrompt == false)
         {
@@ -56,7 +49,7 @@ public class LogoutController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(LogoutInputModel model)
     {
-        var vm = await _account.BuildLoggedOutViewModelAsync(model.LogoutId);
+        var vm = await _accountService.BuildLoggedOutViewModelAsync(model.LogoutId);
 
         var user = HttpContext.User;
         if (user?.Identity.IsAuthenticated == true)
@@ -65,7 +58,7 @@ public class LogoutController : Controller
             await HttpContext.SignOutAsync();
 
             // raise the logout event
-            await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetDisplayName()));
+            await _eventService.RaiseUserLogoutSuccessAsync(user.GetSubjectId(), user.GetUsername());
         }
 
         // check if we need to trigger sign-out at an upstream identity provider

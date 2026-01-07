@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityModel;
-using IdentityServer4;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Voidwell.Auth.Models;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Exceptions;
 using Voidwell.Auth.UserManagement.Models;
@@ -57,12 +54,12 @@ public class CredentialSignOnService : ICredentialSignOnService
 
         var name = authResult.Claims.FirstOrDefault(a => a.Type == JwtClaimTypes.Name)?.Value;
 
-        var user = new IdentityServerUser(authResult.UserId.ToString())
+        var user = new AuthUser(authResult.UserId.ToString())
         {
-            DisplayName = name,
+            Name = name,
             AuthenticationTime = DateTime.UtcNow,
-            AdditionalClaims = authResult.Claims.Where(AdditionalClaimFilter).ToArray(),
-            IdentityProvider = "auth.voidwell.com"
+            AdditionalClaims = [.. authResult.Claims.Where(AdditionalClaimFilter)],
+            IdentityProvider = AuthConstants.IdentityProvider
         };
         var principal = user.CreatePrincipal();
 
@@ -71,7 +68,7 @@ public class CredentialSignOnService : ICredentialSignOnService
             IsPersistent = true
         };
 
-        await _httpContextAccessor.HttpContext.SignInAsync("voidwell", principal, authProps);
+        await _httpContextAccessor.HttpContext.SignInAsync(AuthConstants.CookieSchemeName, principal, authProps);
         return null;
     }
 

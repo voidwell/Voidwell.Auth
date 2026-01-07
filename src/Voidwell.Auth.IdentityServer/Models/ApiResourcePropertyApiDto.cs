@@ -1,4 +1,4 @@
-﻿namespace Voidwell.Auth.Admin.Models;
+﻿namespace Voidwell.Auth.IdentityServer.Models;
 
 public class ApiResourcePropertyApiDto
 {

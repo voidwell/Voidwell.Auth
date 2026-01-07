@@ -14,8 +14,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ISecurityQuestionService, SecurityQuestionService>();
         services.AddTransient<IUserAuthenticationService, UserAuthenticationService>();
 
-        services.AddTransient<IUserHelper, UserHelper>();
-
         return services;
     }
 }
