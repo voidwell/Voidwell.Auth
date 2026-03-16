@@ -1,0 +1,517 @@
+@page "/admin/applications/new"
+@page "/admin/applications/{ClientId}"
+@using Voidwell.Auth.Admin.Models
+@inject IClientService ClientService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudText Typo="Typo.h4" Class="pb-4">
+    @(_isEditMode ? $"{_application.ClientName}" : "Create Application")
+</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudPaper>
+        <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+            <MudTabPanel Text="Basic">
+                <MudGrid>
+                    <MudItem>
+                        <MudSwitch @bind-Value="_application.Enabled" Label="Enabled" Color="Color.Primary" />
+                    </MudItem>
+                    <MudItem>
+                        <MudTextField @bind-Value="_application.ClientId" Label="Client ID" Required="true" Disabled="@_isEditMode" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_application.ClientName" Label="Display Name" Required="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_application.Description" Label="Description" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="_application.ClientType" Label="Client Type">
+                            <MudSelectItem T="string" Value="@("confidential")">Confidential</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("public")">Public</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="_application.ConsentType" Label="Consent Type">
+                            <MudSelectItem T="string" Value="@("explicit")">Explicit</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("implicit")">Implicit</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("external")">External</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("systematic")">Systematic</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_application.ClientUri" Label="Client URI" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_application.LogoUri" Label="Logo URI" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="URIs">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Redirect URIs</MudText>
+                        <MudChipSet T="string" Class="mb-2">
+                            @foreach (var uri in _application.RedirectUris ?? [])
+                            {
+                                <MudChip T="string" Size="Size.Small" OnClose="@(() => RemoveFromList(_application.RedirectUris, uri))">@uri</MudChip>
+                            }
+                        </MudChipSet>
+                        <MudTextField @bind-Value="_newRedirectUri" Label="Add Redirect URI" Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Add" OnAdornmentClick="@(() => AddToList(ref _newRedirectUri, _application.RedirectUris ??= []))" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Post Logout Redirect URIs</MudText>
+                        <MudChipSet T="string" Class="mb-2">
+                            @foreach (var uri in _application.PostLogoutRedirectUris ?? [])
+                            {
+                                <MudChip T="string" Size="Size.Small" OnClose="@(() => RemoveFromList(_application.PostLogoutRedirectUris, uri))">@uri</MudChip>
+                            }
+                        </MudChipSet>
+                        <MudTextField @bind-Value="_newPostLogoutUri" Label="Add Post Logout URI" Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Add" OnAdornmentClick="@(() => AddToList(ref _newPostLogoutUri, _application.PostLogoutRedirectUris ??= []))" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Allowed CORS Origins</MudText>
+                        <MudChipSet T="string" Class="mb-2">
+                            @foreach (var origin in _application.AllowedCorsOrigins ?? [])
+                            {
+                                <MudChip T="string" Size="Size.Small" OnClose="@(() => RemoveFromList(_application.AllowedCorsOrigins, origin))">@origin</MudChip>
+                            }
+                        </MudChipSet>
+                        <MudTextField @bind-Value="_newCorsOrigin" Label="Add CORS Origin" Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Add" OnAdornmentClick="@(() => AddToList(ref _newCorsOrigin, _application.AllowedCorsOrigins ??= []))" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Permissions">
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Allowed Grant Types</MudText>
+                        <MudChipSet T="string" Class="mb-2">
+                            @foreach (var gt in _application.Permissions?.AllowedGrantTypes ?? [])
+                            {
+                                <MudChip T="string" Size="Size.Small" OnClose="@(() => RemoveFromList(_application.Permissions.AllowedGrantTypes, gt))">@gt</MudChip>
+                            }
+                        </MudChipSet>
+                        <MudSelect T="string" Label="Add Grant Type" ValueChanged="@(v => AddToPermissionList(v, _application.Permissions.AllowedGrantTypes ??= []))">
+                            <MudSelectItem T="string" Value="@("authorization_code")">Authorization Code</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("client_credentials")">Client Credentials</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("refresh_token")">Refresh Token</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("implicit")">Implicit</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("password")">Password</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("urn:ietf:params:oauth:grant-type:device_code")">Device Code</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Allowed Scopes</MudText>
+                        <MudChipSet T="string" Class="mb-2">
+                            @foreach (var scope in _application.Permissions?.AllowedScopes ?? [])
+                            {
+                                <MudChip T="string" Size="Size.Small" OnClose="@(() => RemoveFromList(_application.Permissions.AllowedScopes, scope))">@scope</MudChip>
+                            }
+                        </MudChipSet>
+                        <MudTextField @bind-Value="_newScope" Label="Add Scope" Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Add" OnAdornmentClick="@(() => AddToList(ref _newScope, _application.Permissions.AllowedScopes ??= []))" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Allowed Response Types</MudText>
+                        <MudChipSet T="string" Class="mb-2">
+                            @foreach (var rt in _application.Permissions?.AllowedResponseTypes ?? [])
+                            {
+                                <MudChip T="string" Size="Size.Small" OnClose="@(() => RemoveFromList(_application.Permissions.AllowedResponseTypes, rt))">@rt</MudChip>
+                            }
+                        </MudChipSet>
+                        <MudSelect T="string" Label="Add Response Type" ValueChanged="@(v => AddToPermissionList(v, _application.Permissions.AllowedResponseTypes ??= []))">
+                            <MudSelectItem T="string" Value="@("code")">Code</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("id_token")">ID Token</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("id_token token")">ID Token + Token</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("code id_token")">Code + ID Token</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("code token")">Code + Token</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("code id_token token")">Code + ID Token + Token</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("token")">Token</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Allowed Endpoints</MudText>
+                        <MudChipSet T="string" Class="mb-2">
+                            @foreach (var ep in _application.Permissions?.AllowedEndpoints ?? [])
+                            {
+                                <MudChip T="string" Size="Size.Small" OnClose="@(() => RemoveFromList(_application.Permissions.AllowedEndpoints, ep))">@ep</MudChip>
+                            }
+                        </MudChipSet>
+                        <MudSelect T="string" Label="Add Endpoint" ValueChanged="@(v => AddToPermissionList(v, _application.Permissions.AllowedEndpoints ??= []))">
+                            <MudSelectItem T="string" Value="@("authorization")">Authorization</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("token")">Token</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("logout")">Logout</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("revocation")">Revocation</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("introspection")">Introspection</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("device")">Device</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Token Settings">
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="_application.AccessTokenType" Label="Access Token Type">
+                            <MudSelectItem T="string" Value="@("jwt")">JWT</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("reference")">Reference</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField @bind-Value="_application.Settings.AccessTokenLifetime" Label="Access Token Lifetime (seconds)" Min="0" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField @bind-Value="_application.Settings.IdentityTokenLifetime" Label="Identity Token Lifetime (seconds)" Min="0" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField @bind-Value="_application.Settings.AuthorizationCodeLifetime" Label="Authorization Code Lifetime (seconds)" Min="0" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField @bind-Value="_application.Settings.RefreshTokenLifetime" Label="Refresh Token Lifetime (seconds)" Min="0" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField @bind-Value="_application.Settings.DeviceCodeLifetime" Label="Device Code Lifetime (seconds)" Min="0" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="_application.Settings.RefreshTokenUsage" Label="Refresh Token Usage">
+                            <MudSelectItem T="string" Value="@("ReUse")">ReUse</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("OneTimeOnly")">One Time Only</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" @bind-Value="_application.Settings.RefreshTokenExpiration" Label="Refresh Token Expiration">
+                            <MudSelectItem T="string" Value="@("Absolute")">Absolute</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("Sliding")">Sliding</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    @if (_application.Settings?.RefreshTokenExpiration == "Sliding")
+                    {
+                        <MudItem xs="12" md="6">
+                            <MudNumericField @bind-Value="_application.Settings.SlidingRefreshTokenLifetime" Label="Sliding Refresh Token Lifetime (seconds)" Min="60" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Advanced">
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudSwitch @bind-Value="_application.AllowOfflineAccess" Label="Allow Offline Access (Refresh Tokens)" Color="Color.Primary" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSwitch @bind-Value="_application.AllowRememberConsent" Label="Allow Remember Consent" Color="Color.Primary" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSwitch @bind-Value="_application.EnableLocalLogin" Label="Enable Local Login" Color="Color.Primary" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSwitch @bind-Value="_application.Settings.RequireProofKeyForCodeExchange" Label="Require PKCE" Color="Color.Primary" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSwitch @bind-Value="_application.Settings.RequireClientSecret" Label="Require Client Secret" Color="Color.Primary" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            @if (_isEditMode)
+            {
+                <MudTabPanel Text="Secrets">
+                    @if (_secretsLoading)
+                    {
+                        <MudProgressCircular Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <MudGrid Class="mb-4">
+                            <MudItem xs="12" md="5">
+                                <MudTextField @bind-Value="_newSecretDescription" Label="Description" />
+                            </MudItem>
+                            <MudItem xs="12" md="5">
+                                <MudDatePicker @bind-Date="_newSecretExpiration" Label="Expiration (optional)" />
+                            </MudItem>
+                            <MudItem xs="12" md="2" Class="d-flex align-end">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateSecret" FullWidth="true">
+                                    Create Secret
+                                </MudButton>
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudTable Items="@_secrets" Dense="true" Hover="true">
+                            <HeaderContent>
+                                <MudTh>Description</MudTh>
+                                <MudTh>Value</MudTh>
+                                <MudTh>Created</MudTh>
+                                <MudTh>Expiration</MudTh>
+                                <MudTh>Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Description">@context.Description</MudTd>
+                                <MudTd DataLabel="Value"><code>@context.Value</code></MudTd>
+                                <MudTd DataLabel="Created">@context.Created.ToLocalTime().ToString("g")</MudTd>
+                                <MudTd DataLabel="Expiration">
+                                    @if (context.Expiration.HasValue)
+                                    {
+                                        @context.Expiration.Value.ToLocalTime().ToString("g")
+                                    }
+                                    else
+                                    {
+                                        <MudText>Never</MudText>
+                                    }
+                                </MudTd>
+                                <MudTd DataLabel="Actions">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                                   OnClick="@(() => DeleteSecret(context))" />
+                                </MudTd>
+                            </RowTemplate>
+                            <NoRecordsContent>
+                                <MudText>No secrets configured</MudText>
+                            </NoRecordsContent>
+                        </MudTable>
+                    }
+                </MudTabPanel>
+            }
+        </MudTabs>
+
+        <MudDivider Class="my-4" />
+
+        <div class="p-4 flex justify-end gap-2">
+            <MudButton Variant="Variant.Text" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save" Disabled="@_saving">
+                @if (_saving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                Save
+            </MudButton>
+        </div>
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public string ClientId { get; set; }
+
+    private AuthApplicationDto _application = new();
+    private bool _isEditMode;
+    private bool _loading = true;
+    private bool _saving;
+
+    private string _newRedirectUri;
+    private string _newPostLogoutUri;
+    private string _newCorsOrigin;
+    private string _newScope;
+
+    // Secrets
+    private List<ClientSecretDto> _secrets = new();
+    private bool _secretsLoading;
+    private string _newSecretDescription;
+    private DateTime? _newSecretExpiration;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(ClientId))
+        {
+            _isEditMode = true;
+            await LoadApplication();
+        }
+        else
+        {
+            InitializeNewApplication();
+            _loading = false;
+        }
+    }
+
+    private async Task LoadApplication()
+    {
+        try
+        {
+            _application = await ClientService.GetClientAsync(ClientId);
+            _application.Permissions ??= new ClientApiPermissionsDto();
+            _application.Settings ??= new ClientApiSettingsDto();
+            await LoadSecrets();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading application: {ex.Message}", Severity.Error);
+            NavigationManager.NavigateTo("/admin/applications");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadSecrets()
+    {
+        _secretsLoading = true;
+        try
+        {
+            _secrets = (await ClientService.GetClientSecretsAsync(ClientId)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading secrets: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _secretsLoading = false;
+        }
+    }
+
+    private async Task CreateSecret()
+    {
+        try
+        {
+            if (_newSecretExpiration != null)
+            {
+                _newSecretExpiration = DateTime.SpecifyKind(_newSecretExpiration.Value, DateTimeKind.Utc);
+            }
+
+            var request = new SecretRequest
+            {
+                Description = _newSecretDescription,
+                Expiration = _newSecretExpiration
+            };
+
+            var result = await ClientService.CreateClientSecretAsync(ClientId, request);
+
+            await DialogService.ShowMessageBox(
+                "Secret Created",
+                $"Secret created successfully! Make sure to copy this value as it won't be shown again:\n\n{result.Secret}",
+                "OK");
+
+            _newSecretDescription = "";
+            _newSecretExpiration = null;
+            await LoadSecrets();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating secret: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteSecret(ClientSecretDto secret)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Delete Secret",
+            "Are you sure you want to delete this secret?",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (confirmed == true)
+        {
+            try
+            {
+                await ClientService.DeleteClientSecretAsync(ClientId, secret.Id);
+                Snackbar.Add("Secret deleted successfully", Severity.Success);
+                await LoadSecrets();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error deleting secret: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private void InitializeNewApplication()
+    {
+        _application = new AuthApplicationDto
+        {
+            Enabled = true,
+            ClientType = "confidential",
+            ConsentType = "explicit",
+            AccessTokenType = "jwt",
+            AllowOfflineAccess = false,
+            AllowRememberConsent = true,
+            EnableLocalLogin = true,
+            Permissions = new ClientApiPermissionsDto
+            {
+                AllowedGrantTypes = [],
+                AllowedScopes = [],
+                AllowedResponseTypes = [],
+                AllowedEndpoints = []
+            },
+            Settings = new ClientApiSettingsDto
+            {
+                AccessTokenLifetime = 3600,
+                IdentityTokenLifetime = 300,
+                AuthorizationCodeLifetime = 300,
+                RefreshTokenLifetime = 2592000,
+                DeviceCodeLifetime = 300,
+                RefreshTokenUsage = "ReUse",
+                RefreshTokenExpiration = "Absolute",
+                RequireProofKeyForCodeExchange = true,
+                RequireClientSecret = true
+            },
+            RedirectUris = [],
+            PostLogoutRedirectUris = [],
+            AllowedCorsOrigins = []
+        };
+    }
+
+    private void AddToList(ref string value, List<string> list)
+    {
+        if (!string.IsNullOrWhiteSpace(value) && !list.Contains(value))
+        {
+            list.Add(value);
+            value = "";
+        }
+    }
+
+    private void AddToPermissionList(string value, List<string> list)
+    {
+        if (!string.IsNullOrWhiteSpace(value) && !list.Contains(value))
+        {
+            list.Add(value);
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveFromList(List<string> list, string item)
+    {
+        list?.Remove(item);
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/admin/applications");
+    }
+
+    private async Task Save()
+    {
+        _saving = true;
+        try
+        {
+            if (_isEditMode)
+            {
+                await ClientService.UpdateClientAsync(_application.ClientId, _application);
+                Snackbar.Add("Application updated successfully", Severity.Success);
+            }
+            else
+            {
+                await ClientService.CreateClientAsync(_application);
+                Snackbar.Add("Application created successfully", Severity.Success);
+            }
+            NavigationManager.NavigateTo("/admin/applications");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving application: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

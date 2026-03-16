@@ -26,7 +26,7 @@ public class CredentialSignOnService : ICredentialSignOnService
         _logger = logger;
     }
 
-    public async Task<string> Authenticate(AuthenticationRequest authRequest)
+    public async Task<string> AuthenticateAsync(AuthenticationRequest authRequest)
     {
         AuthenticationResult authResult;
         try

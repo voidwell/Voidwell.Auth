@@ -1,0 +1,139 @@
+@using MudBlazor
+@inject IUserService UserService
+@inject IRoleService RoleService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (_loading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (_user != null)
+        {
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField Label="Username" Value="@_user.UserName" ReadOnly="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Email" Value="@_user.Email" ReadOnly="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mt-4">Roles</MudText>
+                    <MudChipSet T="string">
+                        @foreach (var role in _userRoles)
+                        {
+                            <MudChip T="string" Color="Color.Primary" OnClose="@(() => RemoveRole(role))">@role</MudChip>
+                        }
+                    </MudChipSet>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSelect T="string" Label="Add Role" @bind-Value="_selectedRole">
+                        @foreach (var role in _availableRoles.Where(r => !_userRoles.Contains(r)))
+                        {
+                            <MudSelectItem Value="@role">@role</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudButton Color="Color.Primary" OnClick="AddRole" Disabled="@string.IsNullOrEmpty(_selectedRole)" Class="mt-2">
+                        Add Role
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Close())">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public Guid UserId { get; set; }
+
+    private UserDto _user;
+    private List<string> _userRoles = new();
+    private List<string> _availableRoles = new();
+    private string _selectedRole;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserDetails();
+        await LoadAvailableRoles();
+    }
+
+    private async Task LoadUserDetails()
+    {
+        _loading = true;
+        try
+        {
+            var user = await UserService.GetUser(UserId);
+            _user = new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                EmailConfirmed = user.EmailConfirmed,
+                PhoneNumber = user.PhoneNumber,
+                PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                LastLoginDate = user.LastLoginDate
+            };
+            _userRoles = (await UserService.GetRoles(UserId)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading user details: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadAvailableRoles()
+    {
+        try
+        {
+            var roles = await RoleService.GetAllRolesAsync();
+            _availableRoles = roles.Select(r => r.Name).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task AddRole()
+    {
+        if (!string.IsNullOrEmpty(_selectedRole))
+        {
+            try
+            {
+                await UserService.AddRoleAsync(UserId, _selectedRole);
+                _userRoles.Add(_selectedRole);
+                _selectedRole = null;
+                Snackbar.Add("Role added successfully", Severity.Success);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error adding role: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task RemoveRole(string role)
+    {
+        try
+        {
+            await UserService.RemoveRole(UserId, role);
+            _userRoles.Remove(role);
+            Snackbar.Add("Role removed successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error removing role: {ex.Message}", Severity.Error);
+        }
+    }
+
+}

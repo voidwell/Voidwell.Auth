@@ -6,9 +6,20 @@ namespace Voidwell.Auth.Extensions;
 
 internal static class ClaimsPrincipalExtensions
 {
+    public static Guid GetUserId(this ClaimsPrincipal principal)
+    {
+        var subId = principal.GetSubjectId();
+        if (!Guid.TryParse(subId, out var userId))
+        {
+            throw new InvalidOperationException("subject claim is invalid");
+        }
+        return userId;
+    }
+
     public static string GetSubjectId(this ClaimsPrincipal principal)
     {
-        return principal.FindFirstValue(JwtClaimTypes.Subject) ?? throw new InvalidOperationException("subject claim is missing");
+        return principal.FindFirstValue(JwtClaimTypes.Subject)
+            ?? throw new InvalidOperationException("subject claim is missing");
     }
     
     public static string GetDisplayName(this ClaimsPrincipal principal)

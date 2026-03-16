@@ -1,8 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <RazorLangVersion>Latest</RazorLangVersion>
+  </PropertyGroup>
 
   <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="MudBlazor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -10,5 +21,9 @@
     <ProjectReference Include="..\Voidwell.Auth.UserManagement\Voidwell.Auth.UserManagement.csproj" />
     <ProjectReference Include="..\Voidwell.Auth.IdentityProvider\Voidwell.Auth.IdentityProvider.csproj" />
   </ItemGroup>
+
+  <Target Name="BuildTailwindCSS" BeforeTargets="Build">
+    <Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)\..\Voidwell.Auth" />
+  </Target>
 
 </Project>

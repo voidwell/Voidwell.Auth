@@ -1,0 +1,209 @@
+@page "/admin/users"
+@inject IUserService UserService
+@inject IRoleService RoleService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h3" GutterBottom="true">Users</MudText>
+
+<MudTable @ref="_table" Items="@_users" Dense="true" Hover="true" Loading="@_loading" Filter="new Func<UserDto,bool>(FilterFunc)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">User Management</MudText>
+        <MudSpacer />
+        <MudSelect T="string" Label="Filter by Roles" MultiSelection="true" @bind-SelectedValues="_selectedRoles"
+                   Variant="Variant.Outlined" Dense="true" Class="mr-4" Style="min-width: 200px;">
+            @foreach (var role in _allRoles)
+            {
+                <MudSelectItem T="string" Value="@role">@role</MudSelectItem>
+            }
+        </MudSelect>
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>User Name</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Roles</MudTh>
+        <MudTh>Email Confirmed</MudTh>
+        <MudTh>Lockout Enabled</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="User Name">@context.UserName</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Email Confirmed">
+            <MudIcon Icon="@(context.EmailConfirmed ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)"
+                     Color="@(context.EmailConfirmed ? Color.Success : Color.Error)" />
+        </MudTd>
+        <MudTd DataLabel="Roles">
+            @foreach (var role in context.Roles)
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="mr-1 mb-1">@role</MudChip>
+            }
+        </MudTd>
+        <MudTd DataLabel="Lockout Enabled">
+            <MudIcon Icon="@(context.LockoutEnabled ? Icons.Material.Filled.Lock : Icons.Material.Filled.LockOpen)"
+                     Color="@(context.LockoutEnabled ? Color.Warning : Color.Success)" />
+        </MudTd>
+        <MudTd DataLabel="Actions">
+            <MudTooltip Text="Edit User">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                               OnClick="@(() => HandleViewUserDetails(context.Id))" />
+            </MudTooltip>
+            <MudTooltip Text="@(context.LockoutEnabled ? "Unlock User" : "Lock User")">
+                <MudIconButton Icon="@(context.LockoutEnabled ? Icons.Material.Filled.LockOpen : Icons.Material.Filled.Lock)"
+                               Size="Size.Small"
+                               OnClick="@(() => HandleToggleLockout(context))" />
+            </MudTooltip>
+            <MudTooltip Text="Delete User">
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                               OnClick="@(() => HandleDeleteUser(context))" />
+            </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private MudTable<UserDto> _table;
+    private List<UserDto> _users = new();
+    private List<string> _allRoles = new();
+    private IEnumerable<string> _selectedRoles = [];
+    private bool _loading = true;
+    private string _searchString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+        await LoadUsers();
+    }
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            var roles = await RoleService.GetAllRolesAsync();
+            _allRoles = roles.Select(r => r.Name).OrderBy(n => n).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LoadUsers()
+    {
+        _loading = true;
+        try
+        {
+            var allUsers = await UserService.GetUsersWithRolesAsync();
+            var userDtos = new List<UserDto>();
+
+            foreach (var u in allUsers)
+            {
+                userDtos.Add(u.ToDto());
+            }
+
+            _users = userDtos;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading users: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private bool FilterFunc(UserDto user)
+    {
+        // Filter by selected roles (if any selected)
+        if (_selectedRoles.Any())
+        {
+            if (!user.Roles.Any(r => _selectedRoles.Contains(r)))
+                return false;
+        }
+
+        // Filter by search string
+        if (!string.IsNullOrWhiteSpace(_searchString))
+        {
+            if (user.UserName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) != true &&
+                user.Email?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) != true)
+                return false;
+        }
+
+        return true;
+    }
+
+    private async void HandleViewUserDetails(Guid userId) => await ViewUserDetails(userId);
+    private async void HandleToggleLockout(UserDto user) => await ToggleLockout(user);
+    private async void HandleDeleteUser(UserDto user) => await DeleteUser(user);
+
+    private async Task ViewUserDetails(Guid userId)
+    {
+        var parameters = new DialogParameters<UserDetailsDialog>
+        {
+            ["UserId"] = userId
+        };
+        var dialog = await DialogService.ShowAsync<UserDetailsDialog>("User Details", parameters, new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadUsers();
+        }
+    }
+
+    private async Task ToggleLockout(UserDto user)
+    {
+        Console.WriteLine($"ToggleLockout called for user: {user.UserName}");
+        try
+        {
+            if (user.LockoutEnabled)
+            {
+                Console.WriteLine("Unlocking user...");
+                await UserService.UnlockUser(user.Id);
+                Snackbar.Add($"User {user.UserName} unlocked successfully", Severity.Success);
+            }
+            else
+            {
+                Console.WriteLine("Locking user...");
+                await UserService.LockUser(user.Id, 365, true);
+                Snackbar.Add($"User {user.UserName} locked successfully", Severity.Success);
+            }
+            await LoadUsers();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in ToggleLockout: {ex}");
+            Snackbar.Add($"Error toggling lockout: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteUser(UserDto user)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Delete User",
+            $"Are you sure you want to delete user '{user.UserName}'?",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (confirmed == true)
+        {
+            try
+            {
+                await UserService.DeleteUser(user.Id);
+                Snackbar.Add($"User {user.UserName} deleted successfully", Severity.Success);
+                await LoadUsers();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error deleting user: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+}

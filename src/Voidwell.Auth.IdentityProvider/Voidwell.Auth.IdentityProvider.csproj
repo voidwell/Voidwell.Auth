@@ -1,8 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="IdentityServer4" />
-    <PackageReference Include="IdentityServer4.AccessTokenValidation" />
-    <PackageReference Include="IdentityServer4.AspNetIdentity" />
+    <Compile Remove="GrantValidators\ResourceOwnerPassword\**" />
+    <EmbeddedResource Remove="GrantValidators\ResourceOwnerPassword\**" />
+    <None Remove="GrantValidators\ResourceOwnerPassword\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.AspNetCore" />
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+    <PackageReference Include="OpenIddict.Abstractions" />
   </ItemGroup>
     
   <ItemGroup>

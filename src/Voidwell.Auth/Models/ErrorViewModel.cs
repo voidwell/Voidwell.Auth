@@ -1,8 +1,10 @@
-﻿using IdentityServer4.Models;
-
-namespace Voidwell.Auth.Models;
+﻿namespace Voidwell.Auth.Models;
 
 public class ErrorViewModel
 {
-    public ErrorMessage Error { get; set; }
+    public string Error { get; set; }
+
+    public string ErrorDescription { get; set; }
+
+    public string RequestId { get; set; }
 }

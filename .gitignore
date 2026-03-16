@@ -264,3 +264,9 @@ devsettings.json
 *.bat
 *.sh
 *.rsa
+
+# Tailwind CSS generated output
+src/Voidwell.Auth/wwwroot/css/tailwind.css
+
+# AI
+.claude/

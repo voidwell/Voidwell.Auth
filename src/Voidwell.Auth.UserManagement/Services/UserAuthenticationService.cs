@@ -2,12 +2,13 @@
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Voidwell.Auth.UserManagement.Exceptions;
-using Voidwell.Auth.Data.Models;
 using System.Linq;
 using System.Security.Claims;
 using System;
 using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
+using Voidwell.Auth.Data.Entities;
+using IdentityModel;
 
 namespace Voidwell.Auth.UserManagement.Services;
 
@@ -60,8 +61,8 @@ public class UserAuthenticationService : IUserAuthenticationService
 
         var claims = (await _userManager.GetClaimsAsync(user)).ToList();
 
-        claims.Add(new Claim(ClaimTypes.Email, user.Email));
-        claims.Add(new Claim(ClaimTypes.Name, user.UserName));
+        claims.Add(new Claim(JwtClaimTypes.Email, user.Email));
+        claims.Add(new Claim(JwtClaimTypes.Name, user.UserName));
 
         return new AuthenticationResult
         {

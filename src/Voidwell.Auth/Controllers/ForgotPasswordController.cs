@@ -7,7 +7,6 @@ using Voidwell.Auth.UserManagement.Services.Abstractions;
 namespace Voidwell.Auth.Controllers;
 
 [Route("forgotpassword")]
-[SecurityHeaders]
 public class ForgotPasswordController : Controller
 {
     private readonly ISecurityQuestionService _securityQuestionService;

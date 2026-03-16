@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Nav
+
+<MudThemeProvider IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div>
+    <NavBar />
+    <div class="page-container">
+        <div class="page-content">
+            <div class="pt-4">
+                @Body
+            </div>
+        </div>
+    </div>
+</div>

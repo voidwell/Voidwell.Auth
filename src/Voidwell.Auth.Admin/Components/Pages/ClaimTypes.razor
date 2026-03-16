@@ -1,0 +1,85 @@
+@page "/admin/claimtypes"
+@using OpenIddict.Abstractions
+@using static OpenIddict.Abstractions.OpenIddictConstants
+
+<MudText Typo="Typo.h3" GutterBottom="true">Claim Types</MudText>
+
+<MudText Typo="Typo.body1" Class="mb-4">
+    Standard OpenID Connect claim types used in this system. These claims are automatically included based on the requested scopes.
+</MudText>
+
+<MudExpansionPanels MultiExpansion="true">
+    <MudExpansionPanel Text="Standard Claims">
+        <MudTable Items="@_standardClaims" Dense="true" Hover="true">
+            <HeaderContent>
+                <MudTh>Claim Type</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>Scope</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Claim Type">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary">@context.Type</MudChip>
+                </MudTd>
+                <MudTd DataLabel="Description">@context.Description</MudTd>
+                <MudTd DataLabel="Scope">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Secondary">@context.Scope</MudChip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudExpansionPanel>
+
+    <MudExpansionPanel Text="Custom Claims">
+        <MudTable Items="@_customClaims" Dense="true" Hover="true">
+            <HeaderContent>
+                <MudTh>Claim Type</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>Scope</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Claim Type">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Tertiary">@context.Type</MudChip>
+                </MudTd>
+                <MudTd DataLabel="Description">@context.Description</MudTd>
+                <MudTd DataLabel="Scope">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Secondary">@context.Scope</MudChip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+@code {
+    private List<ClaimTypeInfo> _standardClaims = new();
+    private List<ClaimTypeInfo> _customClaims = new();
+
+    protected override void OnInitialized()
+    {
+        _standardClaims = new List<ClaimTypeInfo>
+        {
+            new() { Type = Claims.Subject, Description = "Unique identifier for the user", Scope = "openid" },
+            new() { Type = Claims.Name, Description = "User's full name", Scope = "profile" },
+            new() { Type = Claims.GivenName, Description = "User's first name", Scope = "profile" },
+            new() { Type = Claims.FamilyName, Description = "User's last name", Scope = "profile" },
+            new() { Type = Claims.Email, Description = "User's email address", Scope = "email" },
+            new() { Type = Claims.EmailVerified, Description = "Whether the email is verified", Scope = "email" },
+            new() { Type = Claims.PhoneNumber, Description = "User's phone number", Scope = "phone" },
+            new() { Type = Claims.PhoneNumberVerified, Description = "Whether the phone is verified", Scope = "phone" },
+            new() { Type = Claims.Role, Description = "User's roles", Scope = "roles" },
+            new() { Type = Claims.UpdatedAt, Description = "Last profile update time", Scope = "profile" },
+            new() { Type = Claims.Locale, Description = "User's locale", Scope = "profile" },
+            new() { Type = Claims.Zoneinfo, Description = "User's timezone", Scope = "profile" }
+        };
+
+        _customClaims = new List<ClaimTypeInfo>
+        {
+            new() { Type = "voidwell_admin", Description = "Voidwell admin access indicator", Scope = "voidwell-auth-admin" }
+        };
+    }
+
+    private class ClaimTypeInfo
+    {
+        public string Type { get; set; }
+        public string Description { get; set; }
+        public string Scope { get; set; }
+    }
+}

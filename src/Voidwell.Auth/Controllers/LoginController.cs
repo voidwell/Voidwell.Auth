@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using Voidwell.Auth.Extensions;
+using Voidwell.Auth.IdentityProvider.Services;
 using Voidwell.Auth.IdentityProvider.Services.Abstractions;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Models;
@@ -9,21 +10,17 @@ using Voidwell.Auth.UserManagement.Models;
 namespace Voidwell.Auth.Controllers;
 
 [Route("account/login")]
-[SecurityHeaders]
 public class LoginController : Controller
 {
-    private readonly IIdentityProviderInteractionService _interaction;
+    private readonly IIdentityProviderManager _idpm;
     private readonly IAccountService _accountService;
     private readonly ICredentialSignOnService _credentialSignOnService;
-    private readonly IIdentityProviderEventService _eventService;
 
-    public LoginController(IIdentityProviderInteractionService interaction, ICredentialSignOnService credentialSignOnService,
-        IAccountService accountService, IIdentityProviderEventService eventService)
+    public LoginController(IIdentityProviderManager idpm, ICredentialSignOnService credentialSignOnService, IAccountService accountService)
     {
+        _idpm = idpm;
         _credentialSignOnService = credentialSignOnService;
-        _interaction = interaction;
         _accountService = accountService;
-        _eventService = eventService;
     }
 
     /// <summary>
@@ -50,11 +47,25 @@ public class LoginController : Controller
             string errorMsg = null;
             try
             {
-                var error = await _credentialSignOnService.Authenticate(authRequest);
-                if (error != null)
+                // Validate redirect URL if we're in an OAuth flow (has client_id)
+                if (!string.IsNullOrWhiteSpace(authRequest.ClientId))
                 {
-                    hasError = true;
-                    errorMsg = error;
+                    var client = await _idpm.GetClientAsync(authRequest.ClientId);
+                    if (!string.IsNullOrWhiteSpace(authRequest.ReturnUrl) && !await _idpm.IsValidRedirectUrlAsync(authRequest.ClientId, authRequest.ReturnUrl))
+                    {
+                        hasError = true;
+                        errorMsg = string.Format("Redirect uri '{0}' is invalid for client '{1}'. Notify service administrator.", authRequest.ReturnUrl, authRequest.ClientId);
+                    }
+                }
+
+                if (!hasError)
+                {
+                    var error = await _credentialSignOnService.AuthenticateAsync(authRequest);
+                    if (error != null)
+                    {
+                        hasError = true;
+                        errorMsg = error;
+                    }
                 }
             }
             catch(Exception)
@@ -68,18 +79,10 @@ public class LoginController : Controller
                 var tryAgainView = await _accountService.BuildLoginViewModelAsync(authRequest);
                 tryAgainView.Error = errorMsg;
 
-                // raise the login error event
-                await _eventService.RaiseUserLoginFailureAsync(authRequest.Username, errorMsg, authRequest.ClientId);
-
                 return View(tryAgainView);
             }
 
-            var user = HttpContext.User;
-
-            // raise the login event
-            await _eventService.RaiseUserLoginSuccessAsync(authRequest.Username, user.GetSubjectId(), user.GetUsername(), authRequest.ClientId);
-
-            if (_interaction.IsValidReturnUrl(authRequest.ReturnUrl) || Url.IsLocalUrl(authRequest.ReturnUrl))
+            if (!string.IsNullOrWhiteSpace(authRequest.ReturnUrl))
             {
                 return Redirect(authRequest.ReturnUrl);
             }

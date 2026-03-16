@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using Voidwell.Auth.Data.Models;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Voidwell.Auth.Data;
+using Voidwell.Auth.Data.Entities;
+using Voidwell.Auth.Data.Models;
 using Voidwell.Auth.UserManagement.Exceptions;
 using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
@@ -15,28 +17,47 @@ namespace Voidwell.Auth.UserManagement.Services;
 public class UserService : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AuthDbContext _dbContext;
     private readonly ISecurityQuestionService _securityQuestionService;
     private readonly ILogger<UserService> _logger;
 
-    public UserService(UserManager<ApplicationUser> userManager, ISecurityQuestionService securityQuestionService,
+    public UserService(UserManager<ApplicationUser> userManager, AuthDbContext dbContext, ISecurityQuestionService securityQuestionService,
         ILogger<UserService> logger)
     {
         _userManager = userManager;
+        _dbContext = dbContext;
         _securityQuestionService = securityQuestionService;
         _logger = logger;
     }
 
-    public async Task<IEnumerable<SimpleUser>> GetUsersAsync()
+    public async Task<IEnumerable<ApplicationUser>> GetUsersAsync()
     {
-        var users =  await _userManager.Users
-            .OrderBy(a => a.UserName)
+        return await _userManager.Users
+            .OrderBy(a => a.Id)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<ApplicationUserWithRoles>> GetUsersWithRolesAsync()
+    {
+        var users = await _dbContext.Users.OrderBy(u => u.Id).AsNoTracking().ToListAsync();
+        var userRoles = await _dbContext.UserRoles
+            .Join(_dbContext.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, r.Name })
+            .AsNoTracking()
             .ToListAsync();
 
-        return users.Select(a => new SimpleUser {
-            Id = a.Id,
-            UserName = a.UserName,
-            LastLoginDate = a.LastLoginDate
-        });
+        var roleMap = userRoles.GroupBy(x => x.UserId).ToDictionary(g => g.Key, g => g.Select(x => x.Name).ToHashSet());
+        return users.Select(u => new ApplicationUserWithRoles(u, roleMap.GetValueOrDefault(u.Id) ?? []));
+    }
+
+    public async Task<IEnumerable<ApplicationUser>> GetUsersByRoleAsync(string role)
+    {
+        return await _dbContext.Users
+            .OrderBy(u => u.Id)
+            .Where(u => _dbContext.UserRoles
+                .Join(_dbContext.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur.UserId, r.Name })
+                .Any(x => x.UserId == u.Id && x.Name == role))
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<ApplicationUser> CreateUser(string displayName, string email, string password)
@@ -95,7 +116,7 @@ public class UserService : IUserService
         return await _userManager.GetRolesAsync(user) ?? [];
     }
 
-    public async Task<IEnumerable<string>> AddRole(Guid userId, string role)
+    public async Task<IEnumerable<string>> AddRoleAsync(Guid userId, string role)
     {
         var user = await GetUser(userId);
         await _userManager.AddToRoleAsync(user, role);
@@ -141,25 +162,6 @@ public class UserService : IUserService
         }
 
         return roles;
-    }
-
-    public async Task<UserDetails> GetUserDetails(Guid userId)
-    {
-        var user = await GetUser(userId);
-        var roles = await _userManager.GetRolesAsync(user);
-
-        return new UserDetails
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            Email = user.Email,
-            TimeZone = user.TimeZone,
-            CreatedDate = user.CreatedDate,
-            LastLoginDate = user.LastLoginDate,
-            PasswordSetDate = user.PasswordSetDate,
-            LockoutEndDate = user.LockoutEnd,
-            Roles = roles
-        };
     }
 
     public async Task ChangePassword(Guid userId, string oldPassword, string newPassword)

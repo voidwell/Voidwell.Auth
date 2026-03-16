@@ -1,0 +1,107 @@
+@using MudBlazor
+@using OpenIddict.Abstractions
+@inject NavigationManager Nav
+@implements IDisposable
+
+<div class="navbar justify-center">
+    <div class="page-content">
+        <div class="flex flex-row flex-nowrap items-center">
+            <div class="navbar-header">
+                <a href="/admin">
+                    <span class="navbar-brand">
+                        <div class="logo-wrapper">
+                            <svg class="logo" viewBox="0 0 1031 422" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0,0H304L515,292,726,0h305L727,422,638,299l46-65,43,58L883,75H766L515,422,264,75H148L304,292l43-58,46,65L304,422ZM515,0l84,115-46,65-38-51-37,51-46-65Z" />
+                            </svg>
+                        </div>
+                    </span>
+                </a>
+            </div>
+            <div class="grow flex flex-nowrap items-center ">
+            @foreach (var item in _navItems)
+            {
+                <MudButton Variant="Variant.Text" Color="@GetButtonColor(item.Path)" OnClick="@NavigateTo(item.Path)">@item.Name</MudButton>
+            }
+            </div>
+            <AuthorizeView>
+                <Authorized>
+                    <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense="true">
+                        <ActivatorContent>
+                            <MudButton EndIcon="@Icons.Material.Filled.ArrowDropDown">
+                                <MudText>@context.User.Identity.Name</MudText>
+                            </MudButton>
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem Icon="@Icons.Material.Filled.Logout" Href="/connect/endsession">Log Out</MudMenuItem>
+                        </ChildContent>
+                    </MudMenu>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+@code {
+    private const string navRoot = "/admin";
+
+    private readonly (string Name, string Path)[] _navItems = [
+        ("Dashboard", ""),
+        ("Users", "/users"),
+        ("Roles", "/roles"),
+        ("Claim Types", "/claimtypes"),
+        ("Applications", "/applications"),
+        ("Scopes", "/scopes"),
+        ("Settings", "/settings")
+    ];
+
+    private string _currentPath = "";
+
+    protected override void OnInitialized()
+    {
+        UpdateCurrentPath();
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        UpdateCurrentPath();
+        StateHasChanged();
+    }
+
+    private void UpdateCurrentPath()
+    {
+        _currentPath = "/" + Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].TrimEnd('/');
+
+        // Treat empty path as /admin
+        if (string.IsNullOrEmpty(_currentPath) || _currentPath == "/")
+        {
+            _currentPath = "/admin";
+        }
+    }
+
+    private Color GetButtonColor(string buttonRoute)
+    {
+        var isActive = false;
+        var route = $"{navRoot}{buttonRoute}";
+
+        if (string.IsNullOrWhiteSpace(buttonRoute)) {
+            isActive = _currentPath.Equals(route, StringComparison.OrdinalIgnoreCase);
+        }
+        else {
+            isActive = _currentPath.StartsWith(route, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return isActive ? Color.Primary : Color.Default;
+    }
+
+    private EventCallback NavigateTo(string buttonRoute)
+    {
+        var route = $"{navRoot}{buttonRoute}";
+        return EventCallback.Factory.Create(this, () => Nav.NavigateTo(route));
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+}

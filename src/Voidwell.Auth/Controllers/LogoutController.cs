@@ -1,93 +1,51 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Voidwell.Auth.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Server.AspNetCore;
+using Voidwell.Auth.Data.Entities;
 using Voidwell.Auth.Extensions;
-using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.IdentityProvider.Services.Abstractions;
+using Voidwell.Auth.Models;
+using Voidwell.Auth.Services.Abstractions;
 
 namespace Voidwell.Auth.Controllers;
 
 [Route("account/logout")]
-[SecurityHeaders]
 public class LogoutController : Controller
 {
-    private readonly IIdentityProviderEventService _eventService;
     private readonly IAccountService _accountService;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
     public LogoutController(
-        IIdentityProviderEventService eventService,
-        IAccountService accountService)
+        IAccountService accountService,
+        SignInManager<ApplicationUser> signInManager)
     {
-        _eventService = eventService;
         _accountService = accountService;
+        _signInManager = signInManager;
     }
 
-    /// <summary>
-    /// Show logout page
-    /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Logout(string logoutId)
+    public IActionResult Logout() => View();
+
+    [ActionName(nameof(Logout)), HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> PostLogout()
     {
-        var vm = await _accountService.BuildLogoutViewModelAsync(logoutId);
+        // Ask ASP.NET Core Identity to delete the local and external cookies created
+        // when the user agent is redirected from the external identity provider
+        // after a successful authentication flow (e.g Google or Facebook).
+        await _signInManager.SignOutAsync();
 
-        if (vm.ShowLogoutPrompt == false)
-        {
-            // no need to show prompt
-            return await Logout(vm);
-        }
-
-        return View(vm);
-    }
-
-    /// <summary>
-    /// Handle logout page postback
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Logout(LogoutInputModel model)
-    {
-        var vm = await _accountService.BuildLoggedOutViewModelAsync(model.LogoutId);
-
-        var user = HttpContext.User;
-        if (user?.Identity.IsAuthenticated == true)
-        {
-            // delete local authentication cookie
-            await HttpContext.SignOutAsync();
-
-            // raise the logout event
-            await _eventService.RaiseUserLogoutSuccessAsync(user.GetSubjectId(), user.GetUsername());
-        }
-
-        // check if we need to trigger sign-out at an upstream identity provider
-        if (vm.TriggerExternalSignout)
-        {
-            // build a return URL so the upstream provider will redirect back
-            // to us after the user has logged out. this allows us to then
-            // complete our single sign-out processing.
-            string url = Url.Action("Logout", new { logoutId = vm.LogoutId });
-
-            // hack: try/catch to handle social providers that throw
-            try
+        // Returning a SignOutResult will ask OpenIddict to redirect the user agent
+        // to the post_logout_redirect_uri specified by the client application or to
+        // the RedirectUri specified in the authentication properties if none was set.
+        return SignOut(
+            authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+            properties: new AuthenticationProperties
             {
-                await HttpContext.SignOutAsync(vm.ExternalAuthenticationScheme,
-                    new AuthenticationProperties { RedirectUri = url });
-            }
-            catch (NotSupportedException) // this is for the external providers that don't have signout
-            {
-            }
-            catch (InvalidOperationException) // this is for Windows/Negotiate
-            {
-            }
-        }
-
-        if (vm.AutomaticRedirectAfterSignOut && vm.PostLogoutRedirectUri != null)
-        {
-            return Redirect(vm.PostLogoutRedirectUri);
-        }
-
-        return View("LoggedOut", vm);
+                RedirectUri = "/"
+            });
     }
 }

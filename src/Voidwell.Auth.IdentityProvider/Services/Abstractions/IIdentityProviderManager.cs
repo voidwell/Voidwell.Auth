@@ -1,44 +1,23 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
-using Voidwell.Auth.IdentityProvider.Models;
+using Voidwell.Auth.Data.Entities;
 
 namespace Voidwell.Auth.IdentityProvider.Services.Abstractions;
 
 public interface IIdentityProviderManager
 {
-    Task<ClientApiDto> GetClientAsync(string clientId);
+    Task<AuthApplication> GetClientAsync(string clientId, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<ClientApiDto>> GetClientsAsync();
+    Task<IEnumerable<AuthApplication>> GetClientsAsync(CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<SecretApiDto>> GetClientSecretsAsync(string clientId);
+    Task<AuthApplication> CreateClientAsync(AuthApplication client, CancellationToken cancellationToken = default);
 
-    Task<ClientApiDto> CreateClientAsync(ClientApiDto client);
+    Task<AuthApplication> UpdateClientAsync(string clientId, AuthApplication client, CancellationToken cancellationToken = default);
 
-    Task<ClientApiDto> UpdateClientAsync(string clientId, ClientApiDto client);
+    Task DeleteClientAsync(string clientId, CancellationToken cancellationToken = default);
 
-    Task DeleteClientAsync(string clientId);
+    Task<bool> IsValidRedirectUrlAsync(string clientId, string redirectUrl, CancellationToken cancellationToken = default);
 
-    Task<SecretApiDto> AddClientSecretAsync(string clientId, SecretApiDto request);
-
-    Task DeleteClientSecretAsync(string clientId, int secretId);
-
-    Task<ApiResourceApiDto> GetApiResourceAsync(string name);
-
-    Task<IEnumerable<ApiResourceApiDto>> GetApiResourcesAsync();
-
-    Task<IEnumerable<ApiResourceApiDto>> GetEnabledApiResourcesByScopeAsync(IEnumerable<string> scopeNames);
-
-    Task<ApiResourceApiDto> CreateApiResourceAsync(ApiResourceApiDto apiResource);
-
-    Task<ApiResourceApiDto> UpdateApiResourceAsync(string name, ApiResourceApiDto apiResource);
-
-    Task DeleteApiResourceAsync(string name);
-    
-    Task<IEnumerable<SecretApiDto>> GetApiResourceSecretsAsync(string name);
-
-    Task<SecretApiDto> AddApiResourceSecretAsync(string name, SecretApiDto request);
-
-    Task DeleteApiResourceSecretAsync(string name, int secretId);
-
-    Task<IEnumerable<IdentityResourceDto>> GetEnabledIdentityResourcesByScopeAsync(IEnumerable<string> scopeNames);
+    Task<int> GetIdByClientIdAsync(string clientId, CancellationToken cancellationToken = default);
 }

@@ -4,16 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Voidwell.Auth.Admin.Dtos;
+using Voidwell.Auth.Admin.Mappers;
 using Voidwell.Auth.Data.Models;
 using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
 
 namespace Voidwell.Auth.Admin.Controllers;
 
-[Route("admin/user")]
-[SecurityHeaders]
-[Authorize("IsAdmin")]
-public class UserController : Controller
+[Route("admin/api/user")]
+[Authorize("IsAdminUser")]
+public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
 
@@ -23,27 +24,33 @@ public class UserController : Controller
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedList<SimpleUser>>> GetAllUsers([FromQuery] int page = 1)
+    public async Task<ActionResult<PagedList<UserDto>>> GetAllUsers(string search = null, int? skip = null, int? take = null)
     {
-        const int pageSize = 100;
-
         var users = await _userService.GetUsersAsync();
-        var pageUsers = users
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
+        var totalCount = users.Count();
 
-        var pagedList = new PagedList<SimpleUser>(pageUsers, page, pageSize, users.Count());
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            users = users.Where(user =>
+                (user.UserName != null && user.UserName.Contains(search, StringComparison.InvariantCultureIgnoreCase)) ||
+                (user.Email != null && user.Email.Contains(search, StringComparison.InvariantCultureIgnoreCase)));
+        }
+
+        if (skip != null && take != null)
+        {
+            users = users.Skip(skip.Value).Take(take.Value);
+        }
+
+        var pagedList = new PagedList<UserDto>(users.Select(x => x.ToDto()), totalCount);
 
         return Ok(pagedList);
     }
 
     [HttpGet("{userId:guid}")]
-    public async Task<ActionResult> GetUser(Guid userId)
+    public async Task<ActionResult<UserDto>> GetUser(Guid userId)
     {
-        var details = await _userService.GetUserDetails(userId);
-
-        return Ok(details);
+        var user = await _userService.GetUser(userId);
+        return Ok(user.ToDto());
     }
 
     [HttpDelete("{userId:guid}")]
@@ -55,7 +62,7 @@ public class UserController : Controller
     }
 
     [HttpPost("byemail")]
-    public async Task<ActionResult> GetUserByEmail([FromBody] EmailAddressRequest emailAddress)
+    public async Task<ActionResult<UserDto>> GetUserByEmail([FromBody] EmailAddressRequest emailAddress)
     {
         if (!ModelState.IsValid)
         {
@@ -64,11 +71,11 @@ public class UserController : Controller
 
         var user = await _userService.GetUserByEmail(emailAddress.EmailAddress);
 
-        return user == null ? NotFound() : Ok(user);
+        return user == null ? NotFound() : Ok(user.ToDto());
     }
 
     [HttpGet("{userId:guid}/name")]
-    public async Task<ActionResult> GetDisplayName(Guid userId)
+    public async Task<ActionResult<DisplayName>> GetDisplayName(Guid userId)
     {
         var displayName = await _userService.GetDisplayName(userId);
 
@@ -76,7 +83,7 @@ public class UserController : Controller
     }
 
     [HttpPost("names")]
-    public async Task<ActionResult> GetDisplayNames([FromQuery] IEnumerable<Guid> userIds)
+    public async Task<ActionResult<IEnumerable<DisplayName>>> GetDisplayNames(IEnumerable<Guid> userIds)
     {
         var displayNames = await _userService.GetDisplayNames(userIds);
 
@@ -117,7 +124,7 @@ public class UserController : Controller
     }
 
     [HttpGet("{userId:guid}/roles")]
-    public async Task<ActionResult> GetRolesForUser(Guid userId)
+    public async Task<ActionResult<IEnumerable<string>>> GetRolesForUser(Guid userId)
     {
         var roles = await _userService.GetRoles(userId);
 

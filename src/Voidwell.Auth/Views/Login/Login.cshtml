@@ -1,7 +1,7 @@
 ﻿@model Voidwell.Auth.Models.LoginViewModel
 
-<div class="login-page @(!ViewData.ModelState.IsValid || ViewData.Model.Error != null ? "error" : "")">
-    <div class="login-container">
+<div class="centered-content login-page @(!ViewData.ModelState.IsValid || ViewData.Model.Error != null ? "error" : "")">
+    <div class="login-container py-4">
         <div class="logo-wrapper">
             <svg class="logo" viewBox="0 0 1031 422" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0,0H304L515,292,726,0h305L727,422,638,299l46-65,43,58L883,75H766L515,422,264,75H148L304,292l43-58,46,65L304,422ZM515,0l84,115-46,65-38-51-37,51-46-65Z" />
@@ -28,14 +28,14 @@
                     <a href="https://voidwell.com/account/resetpassword">Forgot Password?</a>
                 </div>
             </div>
-            <div>
-                <button class="login-button pull-right">Login</button>
+            <div class="pt-16 flex flex-nowrap items-center justify-end">
                 <div class="login-remember">
-                    <div asp-for="RememberLogin">
+                    <div class="flex flex-nowrap gap-1" asp-for="RememberLogin">
+                        <input asp-for="RememberLogin">
                         <span class="text">Remember me</span>
-                        <input class="pull-left" asp-for="RememberLogin">
                     </div>
                 </div>
+                <button class="login-button">Login</button>
             </div>
         </form>
     </div>    

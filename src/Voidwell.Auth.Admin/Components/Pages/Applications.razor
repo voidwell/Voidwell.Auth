@@ -1,0 +1,124 @@
+@page "/admin/applications"
+@inject IClientService ClientService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudText Typo="Typo.h4" Class="pb-4">Applications</MudText>
+
+<MudTable @ref="_table" Items="@_applications" Dense="true" Hover="true" Loading="@_loading" Filter="new Func<AuthApplicationDto,bool>(FilterFunc)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Application Management</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mr-4"></MudTextField>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateApplication">
+            Create Application
+        </MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Enabled</MudTh>
+        <MudTh>Client ID</MudTh>
+        <MudTh>Display Name</MudTh>
+        <MudTh>Type</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Enabled">
+            <MudIcon Icon="@(context.Enabled ? Icons.Material.Filled.Check : Icons.Material.Filled.Close)"
+                     Color="@(context.Enabled ? Color.Success : Color.Error)" />
+        </MudTd>
+        <MudTd DataLabel="Client ID">@context.ClientId</MudTd>
+        <MudTd DataLabel="Display Name">@context.ClientName</MudTd>
+        <MudTd DataLabel="Type">
+            <MudChip T="string" Size="Size.Small" Color="@(context.ClientType == "confidential" ? Color.Warning : Color.Info)">
+                @context.ClientType
+            </MudChip>
+        </MudTd>
+        <MudTd DataLabel="Actions">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditApplication(context))" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                           OnClick="@(() => DeleteApplication(context))" />
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private MudTable<AuthApplicationDto> _table;
+    private List<AuthApplicationDto> _applications = new();
+    private bool _loading = true;
+    private string _searchString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadApplications();
+    }
+
+    private async Task LoadApplications()
+    {
+        _loading = true;
+        try
+        {
+            var result = await ClientService.GetClientsAsync(null, null, null);
+            _applications = result.Data.ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading applications: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private bool FilterFunc(AuthApplicationDto app)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (app.ClientId?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+
+        if (app.ClientName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+
+        return false;
+    }
+
+    private void CreateApplication()
+    {
+        NavigationManager.NavigateTo("/admin/applications/new");
+    }
+
+    private void EditApplication(AuthApplicationDto application)
+    {
+        NavigationManager.NavigateTo($"/admin/applications/{application.ClientId}");
+    }
+
+    private async Task DeleteApplication(AuthApplicationDto application)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Delete Application",
+            $"Are you sure you want to delete application '{application.ClientName}'?",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (confirmed == true)
+        {
+            try
+            {
+                await ClientService.RemoveClientAsync(application.ClientId);
+                Snackbar.Add($"Application '{application.ClientName}' deleted successfully", Severity.Success);
+                await LoadApplications();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error deleting application: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+}

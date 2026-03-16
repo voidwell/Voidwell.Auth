@@ -1,0 +1,115 @@
+@page "/admin/roles"
+@inject IRoleService RoleService
+@inject IUserService UserService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h3" GutterBottom="true">Roles</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudText Typo="Typo.h6">Create New Role</MudText>
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudTextField @bind-Value="_newRoleName" Label="Role Name" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateRole"
+                       Disabled="@string.IsNullOrWhiteSpace(_newRoleName)" FullWidth="true">
+                Create Role
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudTable Items="@_roles" Dense="true" Hover="true" Loading="@_loading">
+    <HeaderContent>
+        <MudTh>Role Name</MudTh>
+        <MudTh>Role ID</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Role Name">
+            <MudChip T="string" Color="Color.Primary">@context.Name</MudChip>
+        </MudTd>
+        <MudTd DataLabel="Role ID">@context.Id</MudTd>
+        <MudTd DataLabel="Actions">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                           OnClick="@(() => DeleteRole(context))" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<RoleDto> _roles = new();
+    private bool _loading = true;
+    private string _newRoleName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        _loading = true;
+        try
+        {
+            var roles = await RoleService.GetAllRolesAsync();
+
+            _roles = roles.Select(r => new RoleDto
+            {
+                Id = r.Id,
+                Name = r.Name
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task CreateRole()
+    {
+        if (string.IsNullOrWhiteSpace(_newRoleName))
+            return;
+
+        try
+        {
+            await RoleService.CreateRoleAsync(_newRoleName);
+            Snackbar.Add($"Role '{_newRoleName}' created successfully", Severity.Success);
+            _newRoleName = "";
+            await LoadRoles();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating role: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteRole(RoleDto role)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Delete Role",
+            $"Are you sure you want to delete role '{role.Name}'?",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (confirmed == true)
+        {
+            try
+            {
+                await RoleService.DeleteRoleAsync(role.Id);
+                Snackbar.Add($"Role '{role.Name}' deleted successfully", Severity.Success);
+                await LoadRoles();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error deleting role: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+}

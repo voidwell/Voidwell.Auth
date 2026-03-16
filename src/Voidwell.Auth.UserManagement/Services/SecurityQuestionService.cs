@@ -7,30 +7,29 @@ using System.Threading.Tasks;
 using Voidwell.Auth.UserManagement.Exceptions;
 using Voidwell.Auth.Data;
 using Microsoft.AspNetCore.Identity;
-using Voidwell.Auth.UserManagement.Models;
 using Voidwell.Auth.UserManagement.Services.Abstractions;
+using Voidwell.Auth.Data.Entities;
+using SecurityQuestion = Voidwell.Auth.UserManagement.Models.SecurityQuestion;
 
 namespace Voidwell.Auth.UserManagement.Services;
 
 public class SecurityQuestionService : ISecurityQuestionService
 {
-    private readonly Func<UserDbContext> _dbContextFactory;
-    private readonly UserManager<Data.Models.ApplicationUser> _userManager;
+    private readonly AuthDbContext _dbContext;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<SecurityQuestionService> _logger;
 
-    public SecurityQuestionService(Func<UserDbContext> dbContextFactory, UserManager<Data.Models.ApplicationUser> userManager,
+    public SecurityQuestionService(AuthDbContext userDbContext, UserManager<ApplicationUser> userManager,
         ILogger<SecurityQuestionService> logger)
     {
-        _dbContextFactory = dbContextFactory;
+        _dbContext = userDbContext;
         _userManager = userManager;
         _logger = logger;
     }
 
     public async Task<IEnumerable<SecurityQuestion>> GetSecurityQuestions(Guid userId)
     {
-        var dbContext = _dbContextFactory();
-
-        var questions = await dbContext.SecurityQuestions.Where(a => a.UserId == userId)
+        var questions = await _dbContext.SecurityQuestions.Where(a => a.UserId == userId)
             .ToListAsync();
 
         if (questions == null)
@@ -45,7 +44,7 @@ public class SecurityQuestionService : ISecurityQuestionService
     {
         var dbQuestions = securityQuestions.Select(q =>
         {
-            return new Data.Models.SecurityQuestion
+            return new Data.Entities.SecurityQuestion
             {
                 UserId = userId,
                 Question = q.Question,
@@ -53,19 +52,15 @@ public class SecurityQuestionService : ISecurityQuestionService
             };
         });
 
-        var dbContext = _dbContextFactory();
-
-        dbContext.SecurityQuestions.AddRange(dbQuestions);
-        await dbContext.SaveChangesAsync();
+        _dbContext.SecurityQuestions.AddRange(dbQuestions);
+        await _dbContext.SaveChangesAsync();
 
         return securityQuestions;
     }
 
     public async Task RemoveSecurityQuestions(Guid userId)
     {
-        var dbContext = _dbContextFactory();
-
-        var questions = await dbContext.SecurityQuestions.Where(q => q.UserId == userId)
+        var questions = await _dbContext.SecurityQuestions.Where(q => q.UserId == userId)
             .ToListAsync();
 
         if (questions == null)
@@ -73,8 +68,8 @@ public class SecurityQuestionService : ISecurityQuestionService
             return;
         }
 
-        dbContext.SecurityQuestions.RemoveRange(questions);
-        await dbContext.SaveChangesAsync();
+        _dbContext.SecurityQuestions.RemoveRange(questions);
+        await _dbContext.SaveChangesAsync();
     }
 
     public List<string> GetSecurityQuestionsList()
@@ -99,7 +94,7 @@ public class SecurityQuestionService : ISecurityQuestionService
     public async Task<IEnumerable<SecurityQuestion>> GetSecurityQuestionsByEmail(string email)
     {
         var user = await _userManager.Users.FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower());
-        if (user == default(Data.Models.ApplicationUser))
+        if (user == default(ApplicationUser))
             return null;
 
         return await GetSecurityQuestions(user.Id);

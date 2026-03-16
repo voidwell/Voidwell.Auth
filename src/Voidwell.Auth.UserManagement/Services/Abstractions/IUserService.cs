@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Voidwell.Auth.UserManagement.Models;
+using Voidwell.Auth.Data.Entities;
 using Voidwell.Auth.Data.Models;
 
 namespace Voidwell.Auth.UserManagement.Services.Abstractions;
@@ -13,11 +14,12 @@ public interface IUserService
     Task<ApplicationUser> GetUserByEmail(string email);
     Task<ApplicationUser> UpdateUser(ApplicationUser user);
     Task<IEnumerable<string>> GetRoles(Guid userId);
-    Task<IEnumerable<SimpleUser>> GetUsersAsync();
-    Task<IEnumerable<string>> AddRole(Guid userId, string role);
+    Task<IEnumerable<ApplicationUser>> GetUsersAsync();
+    Task<IEnumerable<ApplicationUserWithRoles>> GetUsersWithRolesAsync();
+    Task<IEnumerable<ApplicationUser>> GetUsersByRoleAsync(string role);
+    Task<IEnumerable<string>> AddRoleAsync(Guid userId, string role);
     Task RemoveRole(Guid userId, string role);
     Task DeleteUser(Guid userId);
-    Task<UserDetails> GetUserDetails(Guid userId);
     Task ChangePassword(Guid userId, string oldPassword, string newPassword);
     Task<string> GetPasswordResetToken(Guid userId);
     Task ResetPassword(Guid userId, string token, string newPassword);

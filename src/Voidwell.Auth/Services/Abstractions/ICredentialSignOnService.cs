@@ -5,5 +5,5 @@ namespace Voidwell.Auth.Services.Abstractions;
 
 public interface ICredentialSignOnService
 {
-    Task<string> Authenticate(AuthenticationRequest authRequest);
+    Task<string> AuthenticateAsync(AuthenticationRequest authRequest);
 }

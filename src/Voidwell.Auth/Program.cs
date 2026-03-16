@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
-using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,7 +13,9 @@ using Microsoft.Extensions.Logging;
 using Voidwell.Auth;
 using Voidwell.Auth.Admin;
 using Voidwell.Auth.Data;
+using Voidwell.Auth.Filters;
 using Voidwell.Auth.IdentityProvider;
+using Voidwell.Auth.Seeding;
 using Voidwell.Auth.Services;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement;
@@ -45,6 +46,9 @@ builder.Logging
     .AddServiceLogging(builder.Environment, builder.Configuration);
 
 // Services
+builder.Services.AddMemoryCache();
+
+builder.Services.AddMvc();
 builder.Services.AddMvcCore()
     .AddJsonOptions(options =>
     {
@@ -53,9 +57,14 @@ builder.Services.AddMvcCore()
     .AddDataAnnotations()
     .AddAuthorization(options =>
     {
-        options.AddPolicy("IsAdmin",
-            policy => policy.AddAuthenticationSchemes("Bearer")
-                            .RequireClaim(JwtClaimTypes.Scope, "voidwell-auth-admin"));
+        options.AddPolicy("IsAdminUser",
+            policy => policy.AddAuthenticationSchemes("Bearer", AuthConstants.CookieSchemeName)
+                            .RequireRole(UserRole.SuperAdmin.ToString(), UserRole.Administrator.ToString()));
+    })
+    .AddMvcOptions(options =>
+    {
+        options.Filters.Add(new NotFoundExceptionFilter());
+        options.Filters.Add(new ConflictExceptionFilter());
     });
 
 builder.Services.AddAuthentication(AuthConstants.CookieSchemeName)
@@ -88,12 +97,13 @@ builder.Services
     })
     .AddCors()
 
-    .AddEntityFrameworkContext(builder.Configuration)
+    .AddAuthData(builder.Configuration)
+    .AddUserManagement()
     .AddTokenServer(builder.Configuration)
     .AddAdminServices()
-    .AddUserManagementServices()
+    .AddSeeding(builder.Configuration)
 
-    .AddSingleton<IClaimsTransformation, ClaimsTransformer>()
+    .AddScoped<IClaimsTransformation, ClaimsTransformer>()
     .AddScoped<ICredentialSignOnService, CredentialSignOnService>()
     .AddScoped<IAccountService, AccountService>()
     .AddScoped<IConsentService, ConsentService>();
@@ -108,11 +118,18 @@ if (app.Environment.IsDevelopment())
 }
 
 app
-    .InitializeDatabases(app.Configuration)
-    .UseForwardedHeaders(forwardedHeaderOptions)
-    .UseAuthentication()
     .UseStaticFiles()
-    .UseIdentityServer()
-    .UseMvc();
+    .UseRouting()
+    .UseAntiforgery()
+    .UseAuthentication()
+    .UseAuthorization()
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapRazorPages();
+        endpoints.MapControllers();
+        endpoints.MapDefaultControllerRoute();
+    });
+
+app.UseAdminApp();
 
 await app.RunAsync();

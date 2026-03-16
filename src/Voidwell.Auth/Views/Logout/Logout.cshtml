@@ -1,15 +1,19 @@
-﻿@model Voidwell.Auth.Models.LogoutViewModel
+﻿@using Microsoft.Extensions.Primitives
 
-<div class="logout-page">
+<div class="centered-content logout-page">
     <div class="page-header">
         <h1>Logout</h1>
     </div>
 
     <div class="row">
         <div class="col-sm-6">
-            <p>Would you like to logout of Voidwell?</p>
+            <p>>Are you sure you want to sign out?</p>
             <form asp-action="Logout">
-                <input type="hidden" name="logoutId" value="@Model.LogoutId"  />
+                @foreach (var parameter in Context.Request.HasFormContentType ? (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
+                {
+                    <input type="hidden" name="@parameter.Key" value="@parameter.Value" />
+                }
+
                 <div class="form-group">
                     <button class="logout-button">Logout</button>
                 </div>

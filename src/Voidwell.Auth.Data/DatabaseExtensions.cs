@@ -1,109 +1,21 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System;
-using System.Reflection;
-using IdentityServer4.EntityFramework.DbContexts;
-using System.Collections.Generic;
-using Voidwell.Auth.Data.Seeding;
-using Voidwell.Auth.Data.Repositories;
-using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Voidwell.Auth.Data;
 
 public static class DatabaseExtensions
 {
-    private static readonly string _migrationAssembly = typeof(DatabaseExtensions).GetTypeInfo().Assembly.GetName().Name;
-    private static readonly Lock _initializeLock = new();
-    private static bool _initialized = false;
-
-    public static IServiceCollection AddEntityFrameworkContext(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthData(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions();
-        services.AddSingleton(impl => impl.GetRequiredService<IOptions<DatabaseOptions>>().Value);
-        services.Configure<DatabaseOptions>(configuration);
+        var connectionString = configuration.GetConnectionString("AuthDB")
+            ?? throw new InvalidOperationException("Connection string 'AuthDB' not found.");
 
         services.AddEntityFrameworkNpgsql();
 
-        services.AddTransient<IClientRepository, ClientRepository>();
-        services.AddTransient<IApiResourceRepository, ApiResourceRepository>();
-        services.AddTransient<IIdentityResourceRepository, IdentityResourceRepository>();
+        services.AddDbContext<AuthDbContext>(builder => AuthDbContextOptions.Configure(builder, connectionString));
 
         return services;
-    }
-
-    public static IIdentityServerBuilder AddIdentityServerStores(this IIdentityServerBuilder idsvBuilder, IConfiguration configuration)
-    {
-        var dbOptions = configuration.Get<DatabaseOptions>();
-
-        idsvBuilder.Services.AddEntityFrameworkNpgsql();
-
-        idsvBuilder.AddConfigurationStore<IdentityServerConfigurationDbContext>(options =>
-            options.ConfigureDbContext = builder =>
-                builder.UseNpgsql(dbOptions.AuthDBConnectionString, b =>
-                {
-                    b.MigrationsAssembly(_migrationAssembly);
-                    b.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null);
-                }));
-
-        idsvBuilder.AddOperationalStore(options =>
-        {
-            options.ConfigureDbContext = builder =>
-                builder.UseNpgsql(dbOptions.AuthDBConnectionString, b =>
-                {
-                    b.MigrationsAssembly(_migrationAssembly);
-                    b.EnableRetryOnFailure(3, TimeSpan.FromSeconds(2), null);
-                });
-
-            options.EnableTokenCleanup = true;
-            options.TokenCleanupInterval = 3600;
-        });
-
-        return idsvBuilder;
-    }
-
-    public static IIdentityServerBuilder AddAspNetIdentityStores(this IIdentityServerBuilder builder, IConfiguration configuration)
-    {
-        var dbOptions = configuration.Get<DatabaseOptions>();
-
-        // change database in connection string to the usermanagement database
-
-        builder.Services.AddDbContext<UserDbContext>(builder =>
-                builder.UseNpgsql(dbOptions.UserDBConnectionString, b => b.MigrationsAssembly(_migrationAssembly)));
-
-        builder.Services.AddScoped(sp => new Func<UserDbContext>(() => sp.GetRequiredService<UserDbContext>()));
-
-        return builder;
-    }
-
-    public static IApplicationBuilder InitializeDatabases(this IApplicationBuilder app, IConfiguration configuration)
-    {
-        if (_initialized)
-        {
-            return app;
-        }
-
-        lock (_initializeLock)
-        {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-            {
-                List<DbContext> dbContextList = [];
-                var sp = serviceScope.ServiceProvider;
-
-                dbContextList.Add(sp.GetRequiredService<PersistedGrantDbContext>());
-                dbContextList.Add(sp.GetRequiredService<IdentityServerConfigurationDbContext>());
-                dbContextList.Add(sp.GetRequiredService<UserDbContext>());
-
-                dbContextList.ForEach(a => a.Database.Migrate());
-            }
-
-            app.SeedDatabase(configuration);
-
-            _initialized = true;
-        }
-
-        return app;
     }
 }

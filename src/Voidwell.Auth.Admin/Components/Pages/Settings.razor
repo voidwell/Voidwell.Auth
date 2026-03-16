@@ -1,0 +1,143 @@
+@page "/admin/settings"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<MudText Typo="Typo.h3" GutterBottom="true">OpenIddict Settings</MudText>
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Server Configuration</MudText>
+            <MudList T="string" Dense="true">
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Link">
+                    <MudText Typo="Typo.body2"><strong>Issuer:</strong></MudText>
+                    <MudText Typo="Typo.body2">@(Configuration.GetValue<string>("Issuer"))</MudText>
+                </MudListItem>
+                <MudDivider />
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Security">
+                    <MudText Typo="Typo.body2"><strong>Token Format:</strong> JWT (JWS Compact Serialization)</MudText>
+                </MudListItem>
+                <MudDivider />
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Key">
+                    <MudText Typo="Typo.body2"><strong>Signing:</strong> Development Certificate (RS256)</MudText>
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Enabled Endpoints</MudText>
+            <MudList T="string" Dense="true">
+                <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                    <MudText>/connect/token</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                    <MudText>/connect/authorize</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                    <MudText>/connect/userinfo</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                    <MudText>/connect/endsession</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                    <MudText>/connect/revocation</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                    <MudText>/connect/introspect</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="Color.Success">
+                    <MudText>/.well-known/openid-configuration</MudText>
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Supported Grant Types</MudText>
+            <MudList T="string" Dense="true">
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudText>authorization_code</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudText>refresh_token</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudText>password</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudText>client_credentials</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudText>implicit</MudText>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudText>delegation (custom)</MudText>
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Supported Scopes</MudText>
+            <MudList T="string" Dense="true">
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary">openid</MudChip>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary">profile</MudChip>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary">email</MudChip>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary">roles</MudChip>
+                </MudListItem>
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary">voidwell-auth-admin</MudChip>
+                </MudListItem>
+            </MudList>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Security Features</MudText>
+            <MudGrid>
+                <MudItem xs="12" md="4">
+                    <MudAlert Severity="Severity.Success" Icon="@Icons.Material.Filled.Security">
+                        Token Endpoint Passthrough Enabled
+                    </MudAlert>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudAlert Severity="Severity.Success" Icon="@Icons.Material.Filled.Security">
+                        Authorization Endpoint Passthrough Enabled
+                    </MudAlert>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudAlert Severity="Severity.Success" Icon="@Icons.Material.Filled.Security">
+                        UserInfo Endpoint Passthrough Enabled
+                    </MudAlert>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudAlert Severity="Severity.Info" Icon="@Icons.Material.Filled.Info">
+                        Multiple Secrets Per Client Supported
+                    </MudAlert>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudAlert Severity="Severity.Info" Icon="@Icons.Material.Filled.Info">
+                        Secret Expiration Supported
+                    </MudAlert>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Warning">
+                        Development Certificates in Use
+                    </MudAlert>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudItem>
+</MudGrid>

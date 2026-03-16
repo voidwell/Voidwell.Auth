@@ -1,0 +1,130 @@
+@page "/admin"
+@using OpenIddict.Abstractions
+@using System
+@inject IUserService UserService
+@inject IRoleService RoleService
+@inject IOpenIddictApplicationManager ApplicationManager
+@inject IOpenIddictScopeManager ScopeManager
+
+<MudText Typo="Typo.h3" GutterBottom="true">Admin Dashboard</MudText>
+<MudText Typo="Typo.body1" Class="mb-4">Welcome to the Voidwell Auth Admin Portal</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <MudText Typo="Typo.h3">@_userCount</MudText>
+                <MudText Typo="Typo.body2">Total Users</MudText>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Href="/admin/users" Variant="Variant.Text" Color="Color.Primary">
+                    View Users
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <MudText Typo="Typo.h3">@_roleCount</MudText>
+                <MudText Typo="Typo.body2">Total Roles</MudText>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Href="/admin/roles" Variant="Variant.Text" Color="Color.Primary">
+                    View Roles
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <MudText Typo="Typo.h3">@_applicationCount</MudText>
+                <MudText Typo="Typo.body2">Applications</MudText>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Href="/admin/applications" Variant="Variant.Text" Color="Color.Primary">
+                    View Applications
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <MudText Typo="Typo.h3">@_scopeCount</MudText>
+                <MudText Typo="Typo.body2">Scopes</MudText>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Href="/admin/scopes" Variant="Variant.Text" Color="Color.Primary">
+                    View Scopes
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Quick Actions</MudText>
+            <MudButtonGroup Variant="Variant.Outlined" Color="Color.Primary">
+                <MudButton StartIcon="@Icons.Material.Filled.PersonAdd" Href="/admin/users">
+                    Manage Users
+                </MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Apps" Href="/admin/applications">
+                    Manage Applications
+                </MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.List" Href="/admin/scopes">
+                    Manage Scopes
+                </MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Settings" Href="/admin/settings">
+                    View Settings
+                </MudButton>
+            </MudButtonGroup>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private int _userCount;
+    private int _roleCount;
+    private int _applicationCount;
+    private int _scopeCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStatistics();
+    }
+
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            var users = await UserService.GetUsersAsync();
+            _userCount = users.Count();
+
+            var roles = await RoleService.GetAllRolesAsync();
+            _roleCount = roles.Count();
+
+            _applicationCount = 0;
+            await foreach (var app in ApplicationManager.ListAsync())
+            {
+                _applicationCount++;
+            }
+
+            _scopeCount = 0;
+            await foreach (var scope in ScopeManager.ListAsync())
+            {
+                _scopeCount++;
+            }
+        }
+        catch
+        {
+            // Silently fail - we're just showing statistics
+        }
+    }
+}

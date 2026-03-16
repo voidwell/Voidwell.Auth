@@ -1,0 +1,141 @@
+@page "/admin/scopes"
+@using OpenIddict.Abstractions
+@inject IOpenIddictScopeManager ScopeManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h3" GutterBottom="true">Scopes</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudText Typo="Typo.h6">Create New Scope</MudText>
+    <MudGrid>
+        <MudItem xs="12" md="4">
+            <MudTextField @bind-Value="_newScopeName" Label="Scope Name" Variant="Variant.Outlined" Required="true" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField @bind-Value="_newScopeDescription" Label="Description" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="2">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateScope"
+                       Disabled="@string.IsNullOrWhiteSpace(_newScopeName)" FullWidth="true">
+                Create Scope
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudTable Items="@_scopes" Dense="true" Hover="true" Loading="@_loading">
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Name">
+            <MudChip T="string" Color="Color.Primary">@context.Name</MudChip>
+        </MudTd>
+        <MudTd DataLabel="Description">@context.Description</MudTd>
+        <MudTd DataLabel="Actions">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                           OnClick="@(() => DeleteScope(context))" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<ScopeInfo> _scopes = new();
+    private bool _loading = true;
+    private string _newScopeName = "";
+    private string _newScopeDescription = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadScopes();
+    }
+
+    private async Task LoadScopes()
+    {
+        _loading = true;
+        try
+        {
+            var scopes = new List<ScopeInfo>();
+            await foreach (var scope in ScopeManager.ListAsync())
+            {
+                scopes.Add(new ScopeInfo
+                {
+                    Id = await ScopeManager.GetIdAsync(scope),
+                    Name = await ScopeManager.GetNameAsync(scope),
+                    Description = await ScopeManager.GetDescriptionAsync(scope)
+                });
+            }
+            _scopes = scopes;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading scopes: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task CreateScope()
+    {
+        if (string.IsNullOrWhiteSpace(_newScopeName))
+            return;
+
+        try
+        {
+            var descriptor = new OpenIddictScopeDescriptor
+            {
+                Name = _newScopeName,
+                Description = _newScopeDescription
+            };
+
+            await ScopeManager.CreateAsync(descriptor);
+            Snackbar.Add($"Scope '{_newScopeName}' created successfully", Severity.Success);
+            _newScopeName = "";
+            _newScopeDescription = "";
+            await LoadScopes();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating scope: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task DeleteScope(ScopeInfo scope)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Delete Scope",
+            $"Are you sure you want to delete scope '{scope.Name}'?",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (confirmed == true)
+        {
+            try
+            {
+                var scopeEntity = await ScopeManager.FindByNameAsync(scope.Name);
+                if (scopeEntity != null)
+                {
+                    await ScopeManager.DeleteAsync(scopeEntity);
+                    Snackbar.Add($"Scope '{scope.Name}' deleted successfully", Severity.Success);
+                    await LoadScopes();
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error deleting scope: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private class ScopeInfo
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+}

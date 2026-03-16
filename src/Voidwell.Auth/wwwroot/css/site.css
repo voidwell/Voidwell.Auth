@@ -1,16 +1,12 @@
-﻿body {
+﻿:root {
+    --navbar-height: 46px;
+    --max-content-width: 1600px;
+}
+
+body {
     background: #22313a;
     font-family: Roboto,"Helvetica Neue",sans-serif;
-    font-size: 1.5em;
     margin: 0;
-}
-
-.pull-right {
-    float: right;
-}
-
-.pull-left {
-    float: left;
 }
 
 h1 {
@@ -18,9 +14,39 @@ h1 {
     opacity: 0.8;
 }
 
-.navbar-header {
-    background: #1e2a31;
-    padding: 8px;
+.centered-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding-top: var(--navbar-height);
+    box-sizing: border-box;
+}
+
+.navbar {
+    background-color: #1e2a31 !important;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: var(--navbar-height);
+    display: flex;
+    align-items: center;
+}
+
+.page-container {
+    display: flex;
+    justify-content: center;
+}
+
+.page-content {
+    width: var(--max-content-width);
+    margin: 0 40px;
+}
+
+.page-container .page-content {
+    padding-top: var(--navbar-height);
 }
 
 .navbar-header a {
@@ -33,25 +59,15 @@ h1 {
     vertical-align: middle;
 }
 
+.navbar-header .navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
 .login-page,
-.logout-page,
-.logged-out {
+.logout-page {
     color: #fff;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     font-size: 12px;
-}
-
-.logged-out .signout {
-    border: none;
-}
-
-.logged-out a.PostLogoutRedirectUri {
-    color: #7b7b7b;
-    font-weight: bold;
-    text-decoration: none;
 }
 
 .navbar-header .logo,
@@ -69,12 +85,15 @@ h1 {
     position: relative;
 }
 
+body:has(.login-page) .navbar-header .logo-wrapper {
+    display: none;
+}
+
 .navbar-header .logo-wrapper {
     height: 30px;
     width: 70px;
     display: inline-block;
     margin-right: 5px;
-    display: none;
 }
 
 .login-page .logo-wrapper {
@@ -122,7 +141,7 @@ h1 {
 }
 .form-input .label {
     position: absolute;
-    top: 16px;
+    top: 5px;
     left: 0;
     font-size: 1em;
     color: #fff;
@@ -164,14 +183,14 @@ h1 {
 }
 .form-input input:not(:placeholder-shown) + span {
     opacity: 0.5;
-    transform: translateY(-26px) scale(0.75);
+    transform: translateY(-20px) scale(0.75);
 }
 .form-input input:focus {
     background: none;
     outline: none;
 }
 .form-input input:focus + span {
-    transform: translateY(-26px) scale(0.75);
+    transform: translateY(-20px) scale(0.75);
     opacity: 1;
 }
 .form-input input:focus + span + .border {
@@ -180,7 +199,6 @@ h1 {
 }
 
 .login-page .login-remember {
-    margin-left: 68px;
     display: none;
 }
 
@@ -201,7 +219,8 @@ h1 {
     opacity: 0.5;
 }
 
-button {
+.login-page button,
+.logout-page button {
     color: #fff;
     background-color: transparent;
     border: 1px solid white !important;
@@ -229,10 +248,6 @@ button {
 .login-page .server-error {
     margin-bottom: 40px;
     text-align: center;
-}
-
-.login-page .login-button {
-    margin-top: 50px;
 }
 
 @keyframes colorflash {

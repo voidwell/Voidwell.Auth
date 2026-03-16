@@ -6,7 +6,6 @@ using Voidwell.Auth.UserManagement.Services.Abstractions;
 namespace Voidwell.Auth.Controllers;
 
 [Route("registration")]
-[SecurityHeaders]
 public class RegistrationController : Controller
 {
     private readonly IRegistrationService _registrationService;

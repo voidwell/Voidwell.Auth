@@ -8,7 +8,6 @@ using Voidwell.Auth.UserManagement.Services.Abstractions;
 namespace Voidwell.Auth.Controllers;
 
 [Route("account/password")]
-[SecurityHeaders]
 public class PasswordController : Controller
 {
     private readonly IUserService _userService;

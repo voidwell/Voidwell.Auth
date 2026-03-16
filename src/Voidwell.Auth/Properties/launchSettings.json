@@ -3,17 +3,19 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:49304/",
-      "sslPort": 0
+      "applicationUrl": "https://localhost:44360/",
+      "sslPort": 44360
     }
   },
   "profiles": {
-    "VoidwellAuth.Client": {
+    "Voidwell.Auth": {
       "commandName": "Project",
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:44360",
+      "launchUrl": "admin",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:5000/"
+      }
     }
   }
 }
