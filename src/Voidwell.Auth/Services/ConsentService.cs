@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
 using Voidwell.Auth.Data.Entities;
-using Voidwell.Auth.IdentityProvider.Models;
-using Voidwell.Auth.IdentityProvider.Services.Abstractions;
 using Voidwell.Auth.Models;
 using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
 
@@ -16,7 +14,7 @@ namespace Voidwell.Auth.Services;
 
 public class ConsentService : IConsentService
 {
-    private static readonly AuthScope OfflineAccessScope = new AuthScope
+    private static readonly AuthScope _offlineAccessScope = new()
     {
         Name = "offline_access",
         DisplayName = ConsentOptions.OfflineAccessDisplayName,
@@ -26,26 +24,28 @@ public class ConsentService : IConsentService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IOpenIddictApplicationManager _applicationManager;
     private readonly IOpenIddictScopeManager _scopeManager;
-    private readonly IIdentityProviderManager _idpm;
     private readonly ILogger<ConsentService> _logger;
 
-    public ConsentService(IHttpContextAccessor httpContextAccessor, IOpenIddictApplicationManager applicationManager, IOpenIddictScopeManager scopeManager, IIdentityProviderManager idpm, ILogger<ConsentService> logger)
+    public ConsentService(IHttpContextAccessor httpContextAccessor, IOpenIddictApplicationManager applicationManager, IOpenIddictScopeManager scopeManager, ILogger<ConsentService> logger)
     {
         _httpContextAccessor = httpContextAccessor;
         _applicationManager = applicationManager;
         _scopeManager = scopeManager;
-        _idpm = idpm;
         _logger = logger;
     }
 
     public IEnumerable<string> GetConsentedScopes(ConsentInputModel model)
     {
-        var result = new ProcessConsentResult();
+        var request = _httpContextAccessor.HttpContext.GetOpenIddictServerRequest() ??
+            throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
-        var scopes = model.ScopesConsented;
+        var requestedScopes = request.GetScopes();
+
+        var scopes = model.ScopesConsented.Intersect(requestedScopes);
+
         if (ConsentOptions.EnableOfflineAccess == false)
         {
-            scopes = scopes.Where(x => x != OfflineAccessScope.Name);
+            scopes = scopes.Where(x => x != _offlineAccessScope.Name);
         }
 
         return scopes.ToArray();
@@ -98,9 +98,9 @@ public class ConsentService : IConsentService
         };
 
         vm.Scopes = resourceScopes.Select(scope => CreateScopeViewModel(scope, vm.ScopesConsented.Contains(scope.Name) || model == null)).ToList();
-        if (ConsentOptions.EnableOfflineAccess && resourceScopes.Any(s => s.Name == OfflineAccessScope.Name))
+        if (ConsentOptions.EnableOfflineAccess && resourceScopes.Any(s => s.Name == _offlineAccessScope.Name))
         {
-            vm.Scopes = vm.Scopes.Union(new[] { CreateScopeViewModel(OfflineAccessScope, vm.ScopesConsented.Contains(OfflineAccessScope.Name) || model == null) }).ToArray();
+            vm.Scopes = [.. vm.Scopes.Union([CreateScopeViewModel(_offlineAccessScope, vm.ScopesConsented.Contains(_offlineAccessScope.Name) || model == null)])];
         }
 
         return vm;
