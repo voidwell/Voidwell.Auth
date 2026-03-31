@@ -11,5 +11,7 @@ public class ApplicationUser : IdentityUser<Guid>
 
     public DateTimeOffset? CreatedDate { get; set; }
 
+    public DateTimeOffset? LastUpdatedDate { get; set; }
+
     public string TimeZone { get; set; }
 }

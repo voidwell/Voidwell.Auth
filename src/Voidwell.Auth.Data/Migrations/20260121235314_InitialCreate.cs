@@ -35,6 +35,7 @@ namespace Voidwell.Auth.Data.Migrations
                     LastLoginDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     PasswordSetDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LastUpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     TimeZone = table.Column<string>(type: "text", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),

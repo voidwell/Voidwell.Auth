@@ -19,6 +19,7 @@ public static class UserMapper
             PhoneNumberConfirmed = entity.PhoneNumberConfirmed,
             TimeZone = entity.TimeZone,
             CreatedDate = entity.CreatedDate,
+            LastUpdatedDate = entity.LastUpdatedDate,
             LastLoginDate = entity.LastLoginDate,
             PasswordSetDate = entity.PasswordSetDate,
             LockoutEndDate = entity.LockoutEnd,

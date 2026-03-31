@@ -68,7 +68,8 @@ public class UserService : IUserService
             Email = email,
             LastLoginDate = DateTimeOffset.UtcNow,
             PasswordSetDate = DateTimeOffset.UtcNow,
-            CreatedDate = DateTimeOffset.UtcNow
+            CreatedDate = DateTimeOffset.UtcNow,
+            LastUpdatedDate = DateTimeOffset.UtcNow
         };
 
         var result = await _userManager.CreateAsync(newUser, password);
