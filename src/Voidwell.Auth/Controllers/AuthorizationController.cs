@@ -100,6 +100,19 @@ public class AuthorizationController : Controller
             });
         }
 
+        // Account selection is not supported
+        if (request.HasPromptValue(PromptValues.SelectAccount))
+        {
+            return Forbid(
+                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties(new Dictionary<string, string>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.AccountSelectionRequired,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                        "Account selection is not supported."
+                }));
+        }
+
         // Retrieve the profile of the logged in user.
         var user = await _userManager.GetUser(result.Principal.GetUserId()) ??
             throw new InvalidOperationException("The user details cannot be retrieved.");
