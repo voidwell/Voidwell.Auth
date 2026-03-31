@@ -54,6 +54,7 @@ internal class PasswordGrantValidator : IGrantValidator
         {
             new(Claims.Subject, user.Id.ToString()),
             new(Claims.Email, user.Email ?? string.Empty),
+            new(Claims.EmailVerified, user.EmailConfirmed.ToString().ToLowerInvariant()),
             new(Claims.Name, user.UserName ?? string.Empty)
         };
 

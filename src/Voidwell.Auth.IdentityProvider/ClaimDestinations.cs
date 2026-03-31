@@ -25,7 +25,7 @@ public static class ClaimDestinations
 
                 yield break;
 
-            case Claims.Email:
+            case Claims.Email or Claims.EmailVerified:
                 yield return Destinations.AccessToken;
 
                 if (claim.Subject!.HasScope(Scopes.Email))

@@ -156,6 +156,7 @@ public class AuthorizationController : Controller
                 // Add the claims that will be persisted in the tokens.
                 identity.SetClaim(Claims.Subject, user.Id.ToString())
                         .SetClaim(Claims.Email, user.Email)
+                        .SetClaim(Claims.EmailVerified, user.EmailConfirmed.ToString().ToLowerInvariant())
                         .SetClaim(Claims.Name, user.UserName)
                         .SetClaims(Claims.Role, [.. (await _userManager.GetRoles(user.Id))]);
 
@@ -258,6 +259,7 @@ public class AuthorizationController : Controller
         // Add the claims that will be persisted in the tokens.
         identity.SetClaim(Claims.Subject, user.Id.ToString())
                 .SetClaim(Claims.Email, user.Email)
+                .SetClaim(Claims.EmailVerified, user.EmailConfirmed.ToString().ToLowerInvariant())
                 .SetClaim(Claims.Name, user.UserName)
                 .SetClaims(Claims.Role, [.. (await _userManager.GetRoles(user.Id))]);
 
