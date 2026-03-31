@@ -25,6 +25,8 @@ public class UserDto
 
     public DateTimeOffset? LastLoginDate { get; set; }
 
+    public DateTime? Birthdate { get; set; }
+
     public DateTimeOffset? PasswordSetDate { get; set; }
 
     public DateTimeOffset? LockoutEndDate { get; set; }

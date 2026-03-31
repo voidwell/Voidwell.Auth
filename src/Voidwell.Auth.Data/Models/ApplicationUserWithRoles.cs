@@ -26,6 +26,7 @@ public class ApplicationUserWithRoles : ApplicationUser
         PasswordSetDate = user.PasswordSetDate;
         CreatedDate = user.CreatedDate;
         LastUpdatedDate = user.LastUpdatedDate;
+        Birthdate = user.Birthdate;
         TimeZone = user.TimeZone;
         Roles = roles;
     }

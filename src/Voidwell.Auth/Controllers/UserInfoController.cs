@@ -55,6 +55,11 @@ public class UserInfoController : ControllerBase
             claims[Claims.Name] = user.UserName ?? string.Empty;
             claims[Claims.PreferredUsername] = user.UserName ?? string.Empty;
             claims[Claims.UpdatedAt] = user.LastUpdatedDate?.ToUnixTimeSeconds() ?? 0;
+
+            if (user.Birthdate.HasValue)
+            {
+                claims[Claims.Birthdate] = user.Birthdate.Value.ToString("yyyy-MM-dd");
+            }
         }
 
         // Email scope claims

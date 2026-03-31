@@ -21,6 +21,7 @@ public static class UserMapper
             CreatedDate = entity.CreatedDate,
             LastUpdatedDate = entity.LastUpdatedDate,
             LastLoginDate = entity.LastLoginDate,
+            Birthdate = entity.Birthdate,
             PasswordSetDate = entity.PasswordSetDate,
             LockoutEndDate = entity.LockoutEnd,
             LockoutEnabled = entity.LockoutEnd.HasValue && entity.LockoutEnd > DateTimeOffset.UtcNow,
