@@ -2,22 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
-COPY *.sln ./
-COPY Directory.Build.props ./
-COPY Directory.Packages.props ./
+COPY . ./
 
-COPY ./src/Voidwell.Auth/*.csproj ./src/Voidwell.Auth/
-COPY ./src/Voidwell.Auth.Data/*.csproj ./src/Voidwell.Auth.Data/
-COPY ./src/Voidwell.Auth.Admin/*.csproj ./src/Voidwell.Auth.Admin/
-COPY ./src/Voidwell.Auth.IdentityProvider/*.csproj ./src/Voidwell.Auth.IdentityProvider/
-COPY ./src/Voidwell.Auth.UserManagement/*.csproj ./src/Voidwell.Auth.UserManagement/
+RUN dotnet restore
 
-RUN --mount=type=cache,target=/root/.nuget/packages dotnet restore --nologo
-
-COPY . .
-
-RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet publish -c Release -o /app/publish --no-restore ./src/Voidwell.Auth/Voidwell.Auth.csproj
+RUN dotnet publish -c Release -o /app/publish --nologo --no-restore ./src/Voidwell.Auth/Voidwell.Auth.csproj
 
 # --- Runtime ---
 FROM mcr.microsoft.com/dotnet/runtime:10.0
