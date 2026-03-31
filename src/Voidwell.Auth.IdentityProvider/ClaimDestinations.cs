@@ -16,30 +16,27 @@ public static class ClaimDestinations
         switch (claim.Type)
         {
             case Claims.Name or Claims.PreferredUsername:
-                yield return Destinations.AccessToken;
-
-                if (claim.Subject!.HasScope(Scopes.Profile))
+                if (claim.Subject.HasScope(Scopes.Profile))
                 {
+                    yield return Destinations.AccessToken;
                     yield return Destinations.IdentityToken;
                 }
 
                 yield break;
 
             case Claims.Email or Claims.EmailVerified:
-                yield return Destinations.AccessToken;
-
-                if (claim.Subject!.HasScope(Scopes.Email))
+                if (claim.Subject.HasScope(Scopes.Email))
                 {
+                    yield return Destinations.AccessToken;
                     yield return Destinations.IdentityToken;
                 }
 
                 yield break;
 
             case Claims.Role:
-                yield return Destinations.AccessToken;
-
-                if (claim.Subject!.HasScope(Scopes.Roles))
+                if (claim.Subject.HasScope(Scopes.Roles))
                 {
+                    yield return Destinations.AccessToken;
                     yield return Destinations.IdentityToken;
                 }
 
