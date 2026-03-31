@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using Voidwell.Auth.Extensions;
-using Voidwell.Auth.IdentityProvider.Services;
-using Voidwell.Auth.IdentityProvider.Services.Abstractions;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement.Models;
 
@@ -12,13 +9,11 @@ namespace Voidwell.Auth.Controllers;
 [Route("account/login")]
 public class LoginController : Controller
 {
-    private readonly IIdentityProviderManager _idpm;
     private readonly IAccountService _accountService;
     private readonly ICredentialSignOnService _credentialSignOnService;
 
-    public LoginController(IIdentityProviderManager idpm, ICredentialSignOnService credentialSignOnService, IAccountService accountService)
+    public LoginController(ICredentialSignOnService credentialSignOnService, IAccountService accountService)
     {
-        _idpm = idpm;
         _credentialSignOnService = credentialSignOnService;
         _accountService = accountService;
     }
@@ -47,25 +42,11 @@ public class LoginController : Controller
             string errorMsg = null;
             try
             {
-                // Validate redirect URL if we're in an OAuth flow (has client_id)
-                if (!string.IsNullOrWhiteSpace(authRequest.ClientId))
+                var error = await _credentialSignOnService.AuthenticateAsync(authRequest);
+                if (error != null)
                 {
-                    var client = await _idpm.GetClientAsync(authRequest.ClientId);
-                    if (!string.IsNullOrWhiteSpace(authRequest.ReturnUrl) && !await _idpm.IsValidRedirectUrlAsync(authRequest.ClientId, authRequest.ReturnUrl))
-                    {
-                        hasError = true;
-                        errorMsg = string.Format("Redirect uri '{0}' is invalid for client '{1}'. Notify service administrator.", authRequest.ReturnUrl, authRequest.ClientId);
-                    }
-                }
-
-                if (!hasError)
-                {
-                    var error = await _credentialSignOnService.AuthenticateAsync(authRequest);
-                    if (error != null)
-                    {
-                        hasError = true;
-                        errorMsg = error;
-                    }
+                    hasError = true;
+                    errorMsg = error;
                 }
             }
             catch(Exception)
@@ -82,7 +63,7 @@ public class LoginController : Controller
                 return View(tryAgainView);
             }
 
-            if (!string.IsNullOrWhiteSpace(authRequest.ReturnUrl))
+            if (!string.IsNullOrWhiteSpace(authRequest.ReturnUrl) && Url.IsLocalUrl(authRequest.ReturnUrl))
             {
                 return Redirect(authRequest.ReturnUrl);
             }
