@@ -92,6 +92,18 @@ internal class AuthorizationCodeGrantValidator : IGrantValidator
             claims.Add(new Claim(Claims.Nonce, nonce));
         }
 
+        var authTime = result.Principal.GetClaim(Claims.AuthenticationTime);
+        if (!string.IsNullOrEmpty(authTime))
+        {
+            claims.Add(new Claim(Claims.AuthenticationTime, authTime, ClaimValueTypes.Integer64));
+        }
+
+        var amr = result.Principal.GetClaim(Claims.AuthenticationMethodReference);
+        if (!string.IsNullOrEmpty(amr))
+        {
+            claims.Add(new Claim(Claims.AuthenticationMethodReference, amr));
+        }
+
         return new GrantValidationResult(user.Id.ToString(), GrantTypes.AuthorizationCode, claims);
     }
 }

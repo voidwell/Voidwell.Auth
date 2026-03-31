@@ -15,7 +15,8 @@ public static class ClaimDestinations
 
         switch (claim.Type)
         {
-            case Claims.Name or Claims.PreferredUsername:
+            case Claims.Name:
+            case Claims.PreferredUsername:
                 if (claim.Subject.HasScope(Scopes.Profile))
                 {
                     yield return Destinations.AccessToken;
@@ -24,7 +25,8 @@ public static class ClaimDestinations
 
                 yield break;
 
-            case Claims.Email or Claims.EmailVerified:
+            case Claims.Email:
+            case Claims.EmailVerified:
                 if (claim.Subject.HasScope(Scopes.Email))
                 {
                     yield return Destinations.AccessToken;
@@ -44,6 +46,14 @@ public static class ClaimDestinations
 
             // Nonce is an anti-replay value for ID tokens — it must never appear in access tokens.
             case Claims.Nonce:
+                yield return Destinations.IdentityToken;
+                yield break;
+
+            // auth_time, amr are OIDC session metadata — include in both tokens so resource servers
+            // can enforce max_age and method requirements without a separate ID token lookup.
+            case Claims.AuthenticationTime:
+            case Claims.AuthenticationMethodReference:
+                yield return Destinations.AccessToken;
                 yield return Destinations.IdentityToken;
                 yield break;
 

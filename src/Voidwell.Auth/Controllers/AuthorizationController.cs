@@ -173,6 +173,13 @@ public class AuthorizationController : Controller
                         .SetClaim(Claims.Name, user.UserName)
                         .SetClaims(Claims.Role, [.. (await _userManager.GetRoles(user.Id))]);
 
+                if (result.Properties?.IssuedUtc is DateTimeOffset authTime)
+                {
+                    identity.AddClaim(new Claim(Claims.AuthenticationTime, authTime.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64));
+                }
+
+                identity.SetClaim(Claims.AuthenticationMethodReference, "pwd");
+
                 // Note: in this sample, the granted scopes match the requested scope
                 // but you may want to allow the user to uncheck specific scopes.
                 // For that, simply restrict the list of scopes before calling SetScopes.
@@ -275,6 +282,14 @@ public class AuthorizationController : Controller
                 .SetClaim(Claims.EmailVerified, user.EmailConfirmed.ToString().ToLowerInvariant())
                 .SetClaim(Claims.Name, user.UserName)
                 .SetClaims(Claims.Role, [.. (await _userManager.GetRoles(user.Id))]);
+
+        var authResult = await HttpContext.AuthenticateAsync();
+        if (authResult.Properties?.IssuedUtc is DateTimeOffset authTime)
+        {
+            identity.AddClaim(new Claim(Claims.AuthenticationTime, authTime.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64));
+        }
+
+        identity.SetClaim(Claims.AuthenticationMethodReference, "pwd");
 
         var scopes = _consentService.GetConsentedScopes(model);
 

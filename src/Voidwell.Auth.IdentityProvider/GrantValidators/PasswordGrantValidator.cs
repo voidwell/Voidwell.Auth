@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -72,6 +73,9 @@ internal class PasswordGrantValidator : IGrantValidator
         {
             claims.Add(new Claim(Claims.Private.Audience, resource));
         }
+
+        claims.Add(new Claim(Claims.AuthenticationTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64));
+        claims.Add(new Claim(Claims.AuthenticationMethodReference, "pwd"));
 
         return new GrantValidationResult(user.Id.ToString(), GrantTypes.Password, claims);
     }
