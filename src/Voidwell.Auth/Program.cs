@@ -20,6 +20,7 @@ using Voidwell.Auth.Services;
 using Voidwell.Auth.Services.Abstractions;
 using Voidwell.Auth.UserManagement;
 using IConsentService = Voidwell.Auth.Services.Abstractions.IConsentService;
+using ILogoutNotificationService = Voidwell.Auth.Services.Abstractions.ILogoutNotificationService;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -47,6 +48,7 @@ builder.Logging
 
 // Services
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
 
 builder.Services.AddMvc();
 builder.Services.AddMvcCore()
@@ -106,7 +108,8 @@ builder.Services
     .AddScoped<IClaimsTransformation, ClaimsTransformer>()
     .AddScoped<ICredentialSignOnService, CredentialSignOnService>()
     .AddScoped<IAccountService, AccountService>()
-    .AddScoped<IConsentService, ConsentService>();
+    .AddScoped<IConsentService, ConsentService>()
+    .AddScoped<ILogoutNotificationService, LogoutNotificationService>();
 
 // Build
 var app = builder.Build();

@@ -22,4 +22,8 @@ public class AuthApplication : OpenIddictEntityFrameworkCoreApplication<int, Aut
     public bool EnableLocalLogin { get; set; } = true;
 
     public List<string> AllowedCorsOrigins { get; set; } = [];
+
+    public string FrontChannelLogoutUri { get; set; }
+
+    public string BackChannelLogoutUri { get; set; }
 }

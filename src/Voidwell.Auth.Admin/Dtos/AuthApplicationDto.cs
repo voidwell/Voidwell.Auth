@@ -48,6 +48,10 @@ public class AuthApplicationDto
 
     public List<string> RedirectUris { get; set; } = [];
 
+    public string FrontChannelLogoutUri { get; set; }
+
+    public string BackChannelLogoutUri { get; set; }
+
     /// <summary>
     /// Client permissions (grant types, scopes, response types/modes, token auth methods)
     /// </summary>

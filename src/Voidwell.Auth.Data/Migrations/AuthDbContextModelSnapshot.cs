@@ -257,6 +257,9 @@ namespace Voidwell.Auth.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("BackChannelLogoutUri")
+                        .HasColumnType("text");
+
                     b.Property<string>("ClientId")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -297,6 +300,9 @@ namespace Voidwell.Auth.Data.Migrations
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("FrontChannelLogoutUri")
+                        .HasColumnType("text");
 
                     b.Property<string>("JsonWebKeySet")
                         .HasColumnType("text");

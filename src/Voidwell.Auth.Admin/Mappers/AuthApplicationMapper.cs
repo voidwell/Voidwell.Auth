@@ -36,6 +36,8 @@ internal static class AuthApplicationMapper
             AllowedCorsOrigins = entity.AllowedCorsOrigins,
             PostLogoutRedirectUris = string.IsNullOrEmpty(entity.PostLogoutRedirectUris) ? [] : JsonSerializer.Deserialize<List<string>>(entity.PostLogoutRedirectUris),
             RedirectUris = string.IsNullOrEmpty(entity.RedirectUris) ? [] : JsonSerializer.Deserialize<List<string>>(entity.RedirectUris),
+            FrontChannelLogoutUri = entity.FrontChannelLogoutUri,
+            BackChannelLogoutUri = entity.BackChannelLogoutUri,
             Permissions = ToPermissionsModel(entity.Permissions),
             Settings = ToSettingsModel(entity.Settings)
         };
@@ -66,6 +68,8 @@ internal static class AuthApplicationMapper
             AllowedCorsOrigins = model.AllowedCorsOrigins,
             RedirectUris = JsonSerializer.Serialize(model.RedirectUris),
             PostLogoutRedirectUris = JsonSerializer.Serialize(model.PostLogoutRedirectUris),
+            FrontChannelLogoutUri = model.FrontChannelLogoutUri,
+            BackChannelLogoutUri = model.BackChannelLogoutUri,
             Permissions = ToPermissionsEntity(model.Permissions),
             Settings = ToSettingsEntity(model.Settings)
         };

@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Server.AspNetCore;
 using Voidwell.Auth.Data.Entities;
 using Voidwell.Auth.Extensions;
+using Voidwell.Auth.Models;
+using Voidwell.Auth.Services.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Voidwell.Auth.Controllers;
@@ -19,11 +21,16 @@ public class EndSessionController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IAntiforgery _antiforgery;
+    private readonly ILogoutNotificationService _logoutNotificationService;
 
-    public EndSessionController(SignInManager<ApplicationUser> signInManager, IAntiforgery antiforgery)
+    public EndSessionController(
+        SignInManager<ApplicationUser> signInManager,
+        IAntiforgery antiforgery,
+        ILogoutNotificationService logoutNotificationService)
     {
         _signInManager = signInManager;
         _antiforgery = antiforgery;
+        _logoutNotificationService = logoutNotificationService;
     }
 
     [HttpGet, HttpPost]
@@ -70,7 +77,24 @@ public class EndSessionController : Controller
                 return BadRequest();
             }
 
+            var subjectId = User.GetSubjectId();
+
+            // Collect front-channel URIs before signing out (while authorizations are still valid).
+            var frontChannelUris = await _logoutNotificationService.GetFrontChannelLogoutUrisAsync(subjectId);
+
             await _signInManager.SignOutAsync();
+
+            // Send back-channel logout notifications fire-and-forget style (errors are logged internally).
+            await _logoutNotificationService.SendBackChannelLogoutNotificationsAsync(subjectId);
+
+            if (frontChannelUris.Count > 0)
+            {
+                return View("FrontChannelLogout", new FrontChannelLogoutViewModel
+                {
+                    FrontChannelLogoutUris = frontChannelUris,
+                    PostLogoutRedirectUri = request.PostLogoutRedirectUri
+                });
+            }
 
             return SignOut(
                 authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,

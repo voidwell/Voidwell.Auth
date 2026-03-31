@@ -79,6 +79,12 @@ else
                         <MudTextField @bind-Value="_newPostLogoutUri" Label="Add Post Logout URI" Adornment="Adornment.End"
                                       AdornmentIcon="@Icons.Material.Filled.Add" OnAdornmentClick="@(() => AddToList(ref _newPostLogoutUri, _application.PostLogoutRedirectUris ??= []))" />
                     </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_application.FrontChannelLogoutUri" Label="Front-Channel Logout URI" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_application.BackChannelLogoutUri" Label="Back-Channel Logout URI" />
+                    </MudItem>
                     <MudItem xs="12">
                         <MudText Typo="Typo.subtitle1" Class="mb-2">Allowed CORS Origins</MudText>
                         <MudChipSet T="string" Class="mb-2">

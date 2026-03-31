@@ -1,0 +1,31 @@
+@model Voidwell.Auth.Models.FrontChannelLogoutViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signing out&hellip;</title>
+    <style>
+        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        iframe { display: none; }
+    </style>
+</head>
+<body>
+    <p>Signing you out&hellip;</p>
+
+    @foreach (var uri in Model.FrontChannelLogoutUris)
+    {
+        <iframe src="@uri"></iframe>
+    }
+
+    <div id="logout-data"
+         data-redirect-uri="@(Model.PostLogoutRedirectUri ?? "/")"
+         style="display:none;"></div>
+
+    <script>
+        var redirectUri = document.getElementById('logout-data').dataset.redirectUri;
+        setTimeout(function () { window.location.href = redirectUri; }, 2000);
+    </script>
+</body>
+</html>
