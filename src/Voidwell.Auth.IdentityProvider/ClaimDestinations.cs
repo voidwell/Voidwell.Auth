@@ -42,6 +42,11 @@ public static class ClaimDestinations
 
                 yield break;
 
+            // Nonce is an anti-replay value for ID tokens — it must never appear in access tokens.
+            case Claims.Nonce:
+                yield return Destinations.IdentityToken;
+                yield break;
+
             // Never include the security stamp in the access and identity tokens, as it's a secret value.
             case "AspNet.Identity.SecurityStamp": yield break;
 

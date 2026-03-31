@@ -86,6 +86,12 @@ internal class AuthorizationCodeGrantValidator : IGrantValidator
             claims.Add(new Claim(Claims.Private.AuthorizationId, authorizationId));
         }
 
+        var nonce = result.Principal.GetClaim(Claims.Nonce);
+        if (!string.IsNullOrEmpty(nonce))
+        {
+            claims.Add(new Claim(Claims.Nonce, nonce));
+        }
+
         return new GrantValidationResult(user.Id.ToString(), GrantTypes.AuthorizationCode, claims);
     }
 }
