@@ -37,7 +37,8 @@ public static class ServiceCollectionExtensions
                 // Enable the flows
                 options.AllowPasswordFlow();
                 options.AllowRefreshTokenFlow();
-                options.AllowAuthorizationCodeFlow();
+                options.AllowAuthorizationCodeFlow()
+                       .RequireProofKeyForCodeExchange();
                 options.AllowClientCredentialsFlow();
                 options.AllowImplicitFlow();
                 options.AllowCustomFlow("delegation");
