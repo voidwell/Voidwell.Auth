@@ -99,7 +99,7 @@ builder.Services
 
     .AddAuthData(builder.Configuration)
     .AddUserManagement()
-    .AddTokenServer(builder.Configuration)
+    .AddTokenServer(builder.Configuration, builder.Environment)
     .AddAdminServices()
     .AddSeeding(builder.Configuration)
 

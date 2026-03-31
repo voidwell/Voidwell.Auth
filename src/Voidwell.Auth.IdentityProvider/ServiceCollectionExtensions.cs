@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
 using Voidwell.Auth.Data;
 using Voidwell.Auth.Data.Entities;
@@ -13,7 +14,7 @@ namespace Voidwell.Auth.IdentityProvider;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddTokenServer(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddTokenServer(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddOpenIddict()
             .AddCore(options =>
@@ -44,8 +45,16 @@ public static class ServiceCollectionExtensions
                 options.AllowCustomFlow("delegation");
 
                 // Configure encryption and signing credentials
-                options.AddDevelopmentEncryptionCertificate()
-                       .AddDevelopmentSigningCertificate();
+                if (environment.IsDevelopment())
+                {
+                    options.AddDevelopmentEncryptionCertificate()
+                           .AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    options.AddEncryptionCertificate(CertificateProvider.GetEncryptionCertificate())
+                           .AddSigningCertificate(CertificateProvider.GetSigningCertificate());
+                }
 
                 // Use self-contained JWT tokens by default (APIs can validate without introspection)
                 // Disable encryption so APIs can validate tokens directly
