@@ -34,6 +34,8 @@ public static class ServiceCollectionExtensions
                 options.SetEndSessionEndpointUris("connect/endsession");
                 options.SetRevocationEndpointUris("connect/revocation");
                 options.SetIntrospectionEndpointUris("connect/introspect");
+                options.SetDeviceAuthorizationEndpointUris("connect/device_authorization");
+                options.SetEndUserVerificationEndpointUris("connect/verify");
 
                 // Enable the flows
                 options.AllowPasswordFlow();
@@ -42,6 +44,7 @@ public static class ServiceCollectionExtensions
                        .RequireProofKeyForCodeExchange();
                 options.AllowClientCredentialsFlow();
                 options.AllowImplicitFlow();
+                options.AllowDeviceAuthorizationFlow();
                 options.AllowCustomFlow("delegation");
 
                 // Configure encryption and signing credentials
@@ -65,7 +68,8 @@ public static class ServiceCollectionExtensions
                     .EnableTokenEndpointPassthrough()
                     .EnableAuthorizationEndpointPassthrough()
                     .EnableUserInfoEndpointPassthrough()
-                    .EnableEndSessionEndpointPassthrough();
+                    .EnableEndSessionEndpointPassthrough()
+                    .EnableEndUserVerificationEndpointPassthrough();
 
                 // Add custom handler for per-client reference token support
                 // This converts JWT tokens to reference tokens for clients configured with AccessTokenType = "reference"

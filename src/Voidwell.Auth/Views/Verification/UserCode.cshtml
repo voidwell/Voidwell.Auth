@@ -1,0 +1,20 @@
+<div class="centered-content login-page">
+    <div class="login-container py-4">
+        <div class="page-header">
+            <h1>Device Activation</h1>
+        </div>
+        <p>Enter the code displayed on your device.</p>
+        <form method="post" action="/connect/verify">
+            <div class="form-input-group">
+                <label class="form-input">
+                    <input type="text" name="user_code" placeholder="&nbsp;" autofocus autocomplete="off" />
+                    <span class="label">Device Code</span>
+                    <span class="border"></span>
+                </label>
+            </div>
+            <div class="pt-16 flex flex-nowrap items-center justify-end">
+                <button class="login-button">Continue</button>
+            </div>
+        </form>
+    </div>
+</div>

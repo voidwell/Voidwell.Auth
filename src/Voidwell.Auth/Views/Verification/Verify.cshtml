@@ -1,0 +1,38 @@
+@model Voidwell.Auth.Models.VerificationViewModel
+
+<div class="page-consent">
+    <div class="row page-header">
+        <div class="col-sm-10">
+            <h1>
+                @Model.ApplicationName
+                <small>is requesting access from your device</small>
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-8">
+            @if (Model.Scopes.Any())
+            {
+                <div class="panel panel-default consent-buttons">
+                    <div class="panel-heading">Requested Permissions</div>
+                    <ul class="list-group">
+                        @foreach (var scope in Model.Scopes)
+                        {
+                            <li class="list-group-item">@scope</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="user_code" value="@Model.UserCode" />
+                <div class="flex flex-nowrap items-center">
+                    <button class="btn btn-primary" name="confirmed" value="yes">Allow</button>
+                    <button class="btn btn-danger" name="confirmed" value="no">Deny</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
