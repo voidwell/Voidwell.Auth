@@ -3,7 +3,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
-using IdentityModel;
 using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
 using Voidwell.Auth.IdentityProvider.Models;
@@ -56,7 +55,7 @@ internal class DelegationGrantValidator : IGrantValidator
             return new GrantValidationResult(Errors.InvalidGrant);
         }
 
-        var subjectClaim = claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
+        var subjectClaim = claims.FirstOrDefault(c => c.Type == Claims.Subject);
         if (subjectClaim == null)
         {
             var claimsList = string.Join(", ", claims.Select(c => $"{c.Type}={c.Value}"));
@@ -65,7 +64,7 @@ internal class DelegationGrantValidator : IGrantValidator
             return new GrantValidationResult(Errors.InvalidGrant);
         }
 
-        var identityProvider = claims.FirstOrDefault(c => c.Type == JwtClaimTypes.IdentityProvider)?.Value;
+        var identityProvider = claims.FirstOrDefault(c => c.Type == "idp")?.Value;
 
         _logger.LogInformation("Delegation GrantValidationResult complete");
 
