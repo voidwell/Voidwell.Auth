@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Voidwell.Auth.IdentityProvider.Services.Abstractions;
@@ -24,6 +25,7 @@ public class TokenController : ControllerBase
     [HttpPost]
     [IgnoreAntiforgeryToken]
     [Produces("application/json")]
+    [EnableRateLimiting("oauth")]
     public async Task<IActionResult> Exchange()
     {
         var request = HttpContext.GetOpenIddictServerRequest() ??

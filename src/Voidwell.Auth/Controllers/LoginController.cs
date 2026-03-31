@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System;
 using System.Threading.Tasks;
 using Voidwell.Auth.Services.Abstractions;
@@ -34,6 +35,7 @@ public class LoginController : Controller
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> Login(AuthenticationRequest authRequest)
     {
         if (ModelState.IsValid)
